@@ -126,7 +126,7 @@ export function RankingPage({
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-[1fr_auto]">
           <select
-            className="rounded-xl border border-[#e8dfd0] bg-white/80 px-3 py-2 text-sm text-[#23211d]"
+            className="rounded-xl border border-semantic-line bg-white/80 px-3 py-2 text-sm text-semantic-ink"
             onChange={(event) => changeJob(event.target.value)}
             value={rankPosition}
           >
@@ -167,9 +167,9 @@ export function RankingPage({
                     {rankingCopy(locale, 'meets_all_requirements')} {eligibleCount}
                   </Badge>
                 </div>
-                <p className="max-w-3xl text-xs leading-5 text-[#716a5e]">{rankingCopy(locale, 'eligible_helper')}</p>
+                <p className="max-w-3xl text-xs leading-5 text-semantic-subtle">{rankingCopy(locale, 'eligible_helper')}</p>
                 {excludedCount > 0 ? (
-                  <p className="max-w-3xl text-xs leading-5 text-[#716a5e]">
+                  <p className="max-w-3xl text-xs leading-5 text-semantic-subtle">
                     {rankingCopy(locale, 'excluded_note').replace('{excluded}', String(excludedCount))}
                   </p>
                 ) : null}
@@ -182,8 +182,8 @@ export function RankingPage({
                 className={cn(
                   'rounded-xl border px-3 py-2 text-sm',
                   stale
-                    ? 'border-amber-200 bg-amber-50 text-amber-900'
-                    : 'border-[#e8dfd0] bg-white/50 text-[#716a5e]',
+                    ? 'border-semantic-warning/60 bg-semantic-warning-soft text-semantic-warning-ink'
+                    : 'border-semantic-line bg-semantic-surface/80 text-semantic-subtle',
                 )}
               >
                 {stateBanner}
@@ -206,18 +206,18 @@ export function RankingPage({
             ) : null}
 
             {!rankingError && ranking?.comparison?.title ? (
-              <div className="rounded-2xl border border-[#e8dfd0] bg-white/45 p-4">
-                <div className="text-sm font-semibold text-[#23211d]">{ranking.comparison.title}</div>
-                {ranking.comparison.detail ? <div className="mt-1 text-sm text-[#716a5e]">{ranking.comparison.detail}</div> : null}
+              <div className="rounded-2xl border border-semantic-line bg-white/45 p-4">
+                <div className="text-sm font-semibold text-semantic-ink">{ranking.comparison.title}</div>
+                {ranking.comparison.detail ? <div className="mt-1 text-sm text-semantic-subtle">{ranking.comparison.detail}</div> : null}
               </div>
             ) : null}
 
             {!rankingError && ranking?.role_profile ? (
-              <div className="rounded-2xl border border-[#e8dfd0] bg-white/45 p-4">
-                <div className="text-sm font-semibold text-[#23211d]">
+              <div className="rounded-2xl border border-semantic-line bg-white/45 p-4">
+                <div className="text-sm font-semibold text-semantic-ink">
                   {rankingCopy(locale, 'fit_profile')}: {ranking.role_profile.label || rankingCopy(locale, 'fit_profile')}
                 </div>
-                <div className="mt-1 text-sm text-[#716a5e]">{rankingCopy(locale, 'fit_profile_detail')}</div>
+                <div className="mt-1 text-sm text-semantic-subtle">{rankingCopy(locale, 'fit_profile_detail')}</div>
               </div>
             ) : null}
 
@@ -298,22 +298,22 @@ export function RankingCandidateCard({
             ? 'rounded-2xl bg-wf-accent-follow p-4 text-wf-accent-follow-ink sm:p-5'
             : index === 2
               ? 'rounded-2xl bg-wf-accent-assess-soft p-4 text-wf-accent-assess-ink sm:p-5'
-              : 'rounded-2xl border border-[#e8dfd0] bg-wf-surface-raised/90 p-4 sm:p-5'
+              : 'rounded-2xl border border-semantic-line bg-wf-surface-raised/90 p-4 sm:p-5'
       }
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div
             className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ${
-              index < 3 ? 'bg-white/55 text-inherit' : 'text-[#716a5e]'
+              index < 3 ? 'bg-white/55 text-inherit' : 'text-semantic-subtle'
             }`}
           >
             {isAr ? `الترتيب #${index + 1}` : `Rank #${index + 1}`}
           </div>
-          <h3 className={`mt-1 text-lg font-semibold tracking-tight ${index < 3 ? 'text-inherit' : 'text-[#23211d]'}`}>
+          <h3 className={`mt-1 text-lg font-semibold tracking-tight ${index < 3 ? 'text-inherit' : 'text-semantic-ink'}`}>
             {decision.candidate_name || candidate.name || candidate.phone}
           </h3>
-          <div className={`mt-1 text-sm ${index < 3 ? 'opacity-75' : 'text-[#716a5e]'}`}>
+          <div className={`mt-1 text-sm ${index < 3 ? 'opacity-75' : 'text-semantic-subtle'}`}>
             {decision.job?.position_title || candidate.position_title || candidate.position_code}
             {' · '}
             {stageLabel(decision.application_stage || candidate.status)}
@@ -338,13 +338,13 @@ export function RankingCandidateCard({
         </div>
       </div>
 
-      <div className={`mt-4 rounded-2xl p-4 ${index < 3 ? 'bg-white/50' : 'border border-[#e8dfd0] bg-[#fffaf0]/80'}`}>
+      <div className={`mt-4 rounded-2xl p-4 ${index < 3 ? 'bg-white/50' : 'border border-semantic-line bg-semantic-surface/80'}`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="max-w-3xl">
-            <div className={`text-xs font-semibold uppercase tracking-wide ${index < 3 ? 'opacity-70' : 'text-[#716a5e]'}`}>
+            <div className={`text-xs font-semibold uppercase tracking-wide ${index < 3 ? 'opacity-70' : 'text-semantic-subtle'}`}>
               {rankingCopy(locale, 'fit_summary')}
             </div>
-            <p className={`mt-2 text-base font-medium leading-7 ${index < 3 ? 'text-inherit' : 'text-[#23211d]'}`}>
+            <p className={`mt-2 text-base font-medium leading-7 ${index < 3 ? 'text-inherit' : 'text-semantic-ink'}`}>
               {fitSummary || (isAr ? 'لا يوجد ملخص توافق بعد.' : 'No fit summary is stored yet.')}
             </p>
           </div>
@@ -372,7 +372,7 @@ export function RankingCandidateCard({
 
       {(evidence.length || cvComponents.length || assessmentComponents.length) ? (
         <details
-          className="mt-4 rounded-xl border border-[#e8dfd0] bg-[#fffaf0]/60 p-4"
+          className="mt-4 rounded-xl border border-semantic-line bg-semantic-surface/60 p-4"
           onToggle={(event) => {
             const open = (event.currentTarget as HTMLDetailsElement).open
             setEvidenceOpen(open)
@@ -383,16 +383,16 @@ export function RankingCandidateCard({
           }}
           open={evidenceOpen}
         >
-          <summary className="cursor-pointer text-sm font-semibold text-[#23211d]">
+          <summary className="cursor-pointer text-sm font-semibold text-semantic-ink">
             {rankingCopy(locale, 'show_evidence')}
           </summary>
           {evidence.length ? (
             <div className="mt-4">
-              <div className="mb-2 text-sm font-semibold text-[#23211d]">{rankingCopy(locale, 'cv_evidence')}</div>
-              <ul className="space-y-2 text-sm leading-6 text-[#716a5e]">
+              <div className="mb-2 text-sm font-semibold text-semantic-ink">{rankingCopy(locale, 'cv_evidence')}</div>
+              <ul className="space-y-2 text-sm leading-6 text-semantic-subtle">
                 {evidence.map((item) => (
                   <li className="flex gap-2" key={item}>
-                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#23211d]/35" />
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-semantic-ink/35" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -400,8 +400,8 @@ export function RankingCandidateCard({
             </div>
           ) : null}
           {cvComponents.length ? (
-            <div className="mt-4 rounded-xl border border-[#e8dfd0] bg-white/50 p-4">
-              <div className="mb-3 text-sm font-semibold text-[#23211d]">{rankingCopy(locale, 'score_components')}</div>
+            <div className="mt-4 rounded-xl border border-semantic-line bg-white/50 p-4">
+              <div className="mb-3 text-sm font-semibold text-semantic-ink">{rankingCopy(locale, 'score_components')}</div>
               <div className="grid gap-2 md:grid-cols-3">
                 {cvComponents.map((item) => (
                   <ScoreBreakdown key={item.key} label={item.label} max={item.max} value={item.value} />
@@ -410,8 +410,8 @@ export function RankingCandidateCard({
             </div>
           ) : null}
           {assessmentEnabled && assessmentComponents.length ? (
-            <div className="mt-3 rounded-xl border border-dashed border-[#e8dfd0] bg-white/35 p-4">
-              <div className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-[#716a5e]">
+            <div className="mt-3 rounded-xl border border-dashed border-semantic-line bg-white/35 p-4">
+              <div className="mb-3 text-xs font-semibold uppercase tracking-[0.14em] text-semantic-subtle">
                 {rankingCopy(locale, 'assessment_evidence')}
               </div>
               <div className="grid gap-2 md:grid-cols-3">
@@ -439,9 +439,9 @@ export function DecisionSnapshot({
   values: string[]
 }) {
   return (
-    <div className="rounded-xl border border-[#e8dfd0] bg-white/45 p-4">
-      <div className="text-xs font-semibold uppercase tracking-wide text-[#716a5e]">{label}</div>
-      <div className={cn('mt-2 text-sm leading-6', tone === 'strong' ? 'text-[#23211d]' : 'text-[#716a5e]')}>
+    <div className="rounded-xl border border-semantic-line bg-white/45 p-4">
+      <div className="text-xs font-semibold uppercase tracking-wide text-semantic-subtle">{label}</div>
+      <div className={cn('mt-2 text-sm leading-6', tone === 'strong' ? 'text-semantic-ink' : 'text-semantic-subtle')}>
         {values.filter(Boolean).slice(0, 2).join(' ') || rankingCopy(locale, 'not_captured')}
       </div>
     </div>

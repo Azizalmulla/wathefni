@@ -145,15 +145,16 @@ describe('simplified Candidates list', () => {
   test('view pills use HR-facing labels and hide Restricted by default', () => {
     render(<CandidateViewPills value="all" onChange={() => undefined} locale="en" />)
     for (const label of ['All', 'With a job', 'No job assigned', 'Hired', 'Archived']) {
-      expect(screen.getByRole('button', { name: label })).toBeInTheDocument()
+      expect(screen.getByRole('tab', { name: label })).toBeInTheDocument()
     }
+    expect(screen.queryByRole('tab', { name: 'Restricted' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab', { name: 'Talent Pool' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Restricted' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Talent Pool' })).not.toBeInTheDocument()
   })
 
   test('Restricted pill appears only when authorized', () => {
     render(<CandidateViewPills value="all" onChange={() => undefined} locale="en" showRestricted />)
-    expect(screen.getByRole('button', { name: 'Restricted' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Restricted' })).toBeInTheDocument()
   })
 
   test('received source labels normalize backend variants', () => {

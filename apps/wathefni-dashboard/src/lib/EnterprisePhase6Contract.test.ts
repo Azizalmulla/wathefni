@@ -101,10 +101,8 @@ describe('HR Web Phase 6 enterprise flagship UX', () => {
     expect(byId['drawer.analytics.metric']?.notes || '').toMatch(/Phase 6/)
   })
 
-  it('does not restyle Recruiting or Settings', () => {
+  it('does not restyle Settings', () => {
     const settings = read('pages/SettingsPage.tsx')
-    const jobs = read('pages/JobsPage.tsx')
     expect(settings).not.toContain('HrSurfaceTabs')
-    expect(jobs).not.toContain('HrSurfaceTabs')
   })
 })

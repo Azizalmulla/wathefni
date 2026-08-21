@@ -35,6 +35,8 @@ export const URL_BACKED_WORKSPACE_TABS = {
   preboarding: ['all', 'blocked', 'ready', 'in_progress', 'not_started'],
   probation: ['attention', 'active', 'under_review', 'confirmed', 'extended', 'failed'],
   inbox: ['needs_action', 'due_soon', 'blocked', 'all'],
+  requisitions: ['attention', 'draft', 'pending_approval', 'approved', 'open', 'filled'],
+  calendar: ['day', 'week', 'month'],
 } as const
 
 export const URL_BACKED_VIEW_PAGES = {

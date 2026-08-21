@@ -66,7 +66,7 @@ function FilterChip({
 }) {
   return (
     <button
-      className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-[#c89445]/35 bg-[#f7f1e7]/90 px-3 py-1.5 text-xs font-semibold text-text shadow-[0_1px_0_rgba(255,255,255,0.75)_inset] transition hover:border-[#c89445]/55 hover:bg-white"
+      className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-semantic-accent/35 bg-semantic-accent-soft/90 px-3 py-1.5 text-xs font-semibold text-text shadow-[0_1px_0_rgba(255,255,255,0.75)_inset] transition hover:border-semantic-accent/55 hover:bg-white"
       data-testid={`candidate-filter-chip-${chip.id}`}
       onClick={onRemove}
       type="button"
@@ -272,7 +272,7 @@ function CandidatesFilterOverlay({
       {/* Mobile: full-height sheet. Desktop: side drawer. */}
       <div
         className={cn(
-          'flex h-full w-full flex-col bg-[#fbf7f0] shadow-[0_24px_80px_rgba(24,20,15,0.28)]',
+          'flex h-full w-full flex-col bg-semantic-surface shadow-[0_24px_80px_rgba(24,20,15,0.28)]',
           'md:ms-auto md:h-full md:max-w-md md:rounded-[1.75rem] md:border md:border-white/70',
         )}
         data-testid="candidates-filter-panel"
@@ -673,7 +673,7 @@ export function CandidatesPage({
             <>
               <div className="overflow-x-auto rounded-[1.35rem] border border-line/55 bg-panel/75 shadow-[0_10px_30px_rgba(24,20,15,0.035)]">
                 <table className="w-full min-w-[720px] text-start text-sm">
-                  <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
+                  <thead className="bg-semantic-accent-soft/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
                     <tr>
                       <th className="px-4 py-3">{locale === 'ar' ? 'المرشح' : 'Candidate'}</th>
                       <th className="px-4 py-3">{locale === 'ar' ? 'الخبرة' : 'Expertise'}</th>

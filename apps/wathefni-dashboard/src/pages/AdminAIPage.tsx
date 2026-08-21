@@ -191,7 +191,7 @@ export function AdminAIPage({
 
   return (
     <section className="flex min-h-0 flex-1 flex-col" data-testid="assistant-page" dir={isAr ? 'rtl' : 'ltr'}>
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-[#e8dfd0]/80 bg-wf-surface shadow-[0_12px_32px_rgba(35,33,29,0.06)]">
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] border border-semantic-line/80 bg-semantic-surface shadow-[0_12px_32px_rgba(35,33,29,0.06)]">
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-line/55 px-5 py-3 lg:px-8">
           <div className="text-xs font-semibold uppercase tracking-[0.2em] text-subtle">{assistantCopy(locale, 'title')}</div>
           <div className="flex items-center gap-1 text-sm">
@@ -266,7 +266,7 @@ export function AdminAIPage({
                       <div className="mt-5 flex max-w-2xl flex-wrap justify-center gap-2" data-testid="assistant-empty-chips">
                         {catalogChips.map((prompt) => (
                           <button
-                            className="rounded-full border border-white/70 bg-white/45 px-4 py-2 text-sm font-medium text-subtle shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_8px_20px_rgba(24,20,15,0.035)] transition duration-200 hover:-translate-y-0.5 hover:bg-panel hover:text-text hover:shadow-soft"
+                            className="rounded-full border border-semantic-line/70 bg-semantic-surface/45 px-4 py-2 text-sm font-medium text-subtle shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_8px_20px_rgba(24,20,15,0.035)] transition-colors duration-150 hover:bg-semantic-surface hover:text-text"
                             key={prompt}
                             onClick={() => onPrompt(prompt)}
                             type="button"
@@ -283,7 +283,7 @@ export function AdminAIPage({
                 <div
                   className={
                     message.role === 'user'
-                      ? 'ml-auto w-fit max-w-[60%] rounded-[1.35rem] bg-[linear-gradient(180deg,#24211d_0%,#11100e_100%)] px-[18px] py-3 text-white shadow-[0_14px_34px_rgba(24,20,15,0.18)]'
+                      ? 'ml-auto w-fit max-w-[60%] rounded-[1.35rem] bg-semantic-ink px-[18px] py-3 text-white shadow-[0_14px_34px_rgba(24,20,15,0.18)]'
                       : 'flex max-w-5xl items-start gap-3'
                   }
                   key={message.id}
@@ -512,7 +512,7 @@ export function AdminAIPage({
                       <div className="space-y-2">
                         {group.sessions.map((session) => (
                           <button
-                            className="w-full rounded-2xl border border-line/60 bg-white/36 p-3 text-left transition hover:border-[#c89445]/35 hover:bg-panel/75"
+                            className="w-full rounded-2xl border border-line/60 bg-white/36 p-3 text-left transition-colors duration-150 hover:border-semantic-accent/35 hover:bg-panel/75"
                             key={session.conversation_id}
                             onClick={() => onOpenSession(session)}
                             type="button"

@@ -70,7 +70,7 @@ describe('Assistant page UX contract', () => {
 
   test('suggestion chips stay neutral cream (no capability tint)', () => {
     const src = readFileSync(resolve(__dirname, 'AdminAIPage.tsx'), 'utf8')
-    expect(src).toContain('bg-white/45')
+    expect(src).toContain('bg-semantic-surface/45')
     expect(src).toContain('text-subtle')
     expect(src).not.toMatch(/assistant-empty-chips[\s\S]{0,800}wf-accent-/)
   })

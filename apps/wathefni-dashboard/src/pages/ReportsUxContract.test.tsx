@@ -33,7 +33,7 @@ describe('Reports page UX contract', () => {
 
   test('export and breakdown counts use black pills (not muted badges)', () => {
     const src = readFileSync(resolve(__dirname, 'ReportsPage.tsx'), 'utf8')
-    expect(src).toContain('bg-[#23211d] px-2 text-[11px] font-semibold text-white')
+    expect(src).toContain('bg-semantic-ink px-2 text-[11px] font-semibold text-white')
     expect(src).not.toContain('Badge tone="muted"')
     expect(src).toContain('h-2 w-2 shrink-0 rounded-full')
   })

@@ -60,7 +60,7 @@ export function HrSurfaceTabs<T extends string>({
               onClick={() => onChange(item.id)}
             >
               {item.label}
-              {item.count ? <span className="ms-1 opacity-80">({item.count})</span> : null}
+              {typeof item.count === 'number' ? <span className="ms-1 opacity-80">({item.count})</span> : null}
             </button>
           )
         })}

@@ -644,7 +644,7 @@ export function CandidateProfilePage({
                     key={app.app_key}
                     className={[
                       'w-full rounded-2xl border p-4 text-start transition',
-                      active ? 'border-[#c89445]/35 bg-white/70' : 'border-line/55 bg-white/35 hover:bg-white/55',
+                      active ? 'border-semantic-accent/35 bg-white/70' : 'border-line/55 bg-white/35 hover:bg-white/55',
                     ].join(' ')}
                     onClick={() => onSelectApplication(app)}
                     type="button"

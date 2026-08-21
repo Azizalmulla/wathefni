@@ -114,8 +114,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/assistant (chat) — never a second evaluator',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
-    notes: 'Offerable with several post-hire modules when pre_hiring is off.',
+    migration_status: 'canonical',
+    notes: 'Phase 7 recruiting. Chat consumer of canonical domain APIs — never a second evaluator or ranking path.',
   },
   {
     page: 'jobs',
@@ -126,6 +126,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
+    notes: 'Phase 7 recruiting. Openings inventory with status tiles. Search and status are URL-backed. Distinct from job architecture.',
   },
   {
     page: 'requisitions',
@@ -135,7 +136,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/prehire/requisitions',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'enterprise',
+    migration_status: 'canonical',
+    notes: 'Phase 7 recruiting. Headcount approval before jobs publish. Queue tab and selected requisition are URL-backed. SoD stays backend.',
   },
   {
     page: 'candidates',
@@ -146,6 +148,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
+    notes: 'Phase 7 recruiting. Saved views stay (all / with a job / no job / hired / archived / restricted). Distinct from talent_pool vs Talent Intelligence.',
   },
   {
     page: 'interviews',
@@ -156,7 +159,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
-    notes: 'Also unlocked by video_interviews via moduleAnyOf.',
+    notes: 'Phase 7 recruiting. Also unlocked by video_interviews via moduleAnyOf. URL-backed tabs and interview states stay backend.',
   },
   {
     page: 'calendar',
@@ -166,7 +169,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/prehire/calendar',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
+    migration_status: 'canonical',
+    notes: 'Phase 7 recruiting. Spatial board kept. Day/week/month and anchor date are URL-backed. Scope remains a local preference.',
   },
   {
     page: 'assessments',
@@ -177,6 +181,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
+    notes: 'Phase 7 recruiting. Assessment authority stays backend. Cached report paint preserved.',
   },
   {
     page: 'ranking',
@@ -187,7 +192,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/prehire/ranking',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
+    migration_status: 'canonical',
+    notes: 'Phase 7 recruiting. Evidence-based and explainable. Frontend displays backend ranking — it does not invent scores.',
   },
   {
     page: 'notifications',
@@ -209,7 +215,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/prehire/reports',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
+    migration_status: 'canonical',
+    notes: 'Phase 7 recruiting. Leadership snapshot and exports. Counts come from the reports API — the UI does not recompute funnel math.',
   },
   {
     page: 'employees',
@@ -568,6 +575,8 @@ const WORKSPACE_TABS: Record<string, string[]> = {
   preboarding: ['all', 'blocked', 'ready', 'in_progress', 'not_started'],
   probation: ['attention', 'active', 'under_review', 'confirmed', 'extended', 'failed'],
   inbox: ['needs_action', 'due_soon', 'blocked', 'all'],
+  requisitions: ['attention', 'draft', 'pending_approval', 'approved', 'open', 'filled'],
+  calendar: ['day', 'week', 'month'],
 }
 
 const NESTED: HrWebSurface[] = [
@@ -1208,7 +1217,9 @@ for (const [page, tabs] of Object.entries(WORKSPACE_TABS)) {
           page === 'engagement' ||
           page === 'compensation-planning' ||
           page === 'workforce-planning' ||
-          page === 'job-architecture'
+          page === 'job-architecture' ||
+          page === 'requisitions' ||
+          page === 'calendar'
             ? 'canonical'
             : 'enterprise',
         notes:
@@ -1230,6 +1241,8 @@ for (const [page, tabs] of Object.entries(WORKSPACE_TABS)) {
                   page === 'workforce-planning' ||
                   page === 'job-architecture'
                 ? 'Phase 6 enterprise flagship. Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.'
+                : page === 'requisitions' || page === 'calendar'
+                  ? 'Phase 7 recruiting. Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.'
                 : 'Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.',
       }),
     )

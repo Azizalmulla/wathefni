@@ -93,7 +93,7 @@ export const CANDIDATE_FILTER_KEYS = [
   'department_intake_tag',
 ] as const
 
-const INTERVIEW_FILTER_KEYS = ['status', 'tab', 'role', 'date', 'interviewer', 'cohort_key', 'overview_cohort'] as const
+const INTERVIEW_FILTER_KEYS = ['status', 'tab', 'role', 'date', 'interviewer', 'cohort_key', 'overview_cohort', 'q'] as const
 const RANKING_FILTER_KEYS = ['position_code', 'cohort_key'] as const
 const ASSESSMENT_FILTER_KEYS = ['assessment_cohort', 'overview_cohort', 'cohort_key', 'tab', 'action', 'q'] as const
 const PEOPLE_FILTER_KEYS = ['q', 'status', 'view', 'tab', 'department', 'onboarding', 'employee'] as const
@@ -204,7 +204,14 @@ export function buildDashboardSearchParams(
       const status = String(filters.status || '').trim()
       if (status) params.set('status', status)
     }
-  } else if (state.page === 'attendance') {
+  } else if (state.page === 'jobs' || state.page === 'requisitions') {
+    const status = String(filters.status || '').trim()
+    const q = String(filters.q || '').trim()
+    const tab = String(filters.tab || '').trim()
+    if (status) params.set('status', status)
+    if (q) params.set('q', q)
+    if (state.page === 'requisitions' && tab) params.set('tab', tab)
+  } else if (state.page === 'attendance' || state.page === 'calendar') {
     const date = String(filters.date || '').trim()
     const dateEnd = String(filters.date_end || '').trim()
     if (date) params.set('date', date)

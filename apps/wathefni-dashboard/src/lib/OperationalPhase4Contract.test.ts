@@ -48,7 +48,7 @@ describe('HR Web Phase 4 operational core UX', () => {
     expect(URL_BACKED_VIEW_PAGES.payroll).toEqual(['payslips', 'close', 'statutory'])
     const app = read('App.tsx')
     expect(app).toContain('isOperationalCorePage')
-    expect(app).toContain('density="page"')
+    expect(app).toMatch(/density=\{[\s\S]{0,80}'page'/)
   })
 
   it('registers Phase 4 surfaces with query-backed chrome', () => {
@@ -65,10 +65,8 @@ describe('HR Web Phase 4 operational core UX', () => {
     expect(byId['tab.attendance.capture']?.notes || '').toMatch(/local/)
   })
 
-  it('does not restyle Recruiting or Settings chrome in this phase', () => {
+  it('does not restyle Settings in this phase', () => {
     const settings = read('pages/SettingsPage.tsx')
-    const jobs = read('pages/JobsPage.tsx')
     expect(settings).not.toContain('HrSurfaceTabs')
-    expect(jobs).not.toContain('HrSurfaceTabs')
   })
 })

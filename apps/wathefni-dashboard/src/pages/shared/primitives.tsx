@@ -72,7 +72,7 @@ export function EmptyState({ text }: { text: string }) {
   return (
     <div className="rounded-[1.5rem] border border-dashed border-line/75 bg-white/28 p-5 text-sm leading-6 text-subtle">
       <div className="flex items-center gap-2 font-medium text-text">
-        <span className="h-1.5 w-1.5 rounded-full bg-[#c89445]" />
+        <span className="h-1.5 w-1.5 rounded-full bg-semantic-accent" />
         <span className="max-w-2xl">{text}</span>
       </div>
     </div>

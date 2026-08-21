@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import QRCode from 'qrcode'
 import { useEffect, useMemo, useState, type KeyboardEvent, type ReactNode } from 'react'
 
+import { HrSection } from '@/components/hr/HrSection'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { LoadMoreBar } from '@/components/ui/load-more-bar'
@@ -97,13 +98,13 @@ function ApplicantsControl({
   const t = (key: Parameters<typeof recruitingCopy>[1], vars?: Record<string, string | number>) =>
     recruitingCopy(locale, key, vars)
   if (apps <= 0) {
-    return <span className="text-[#716a5e]">{compact ? '—' : t('jobsNoAppsYet')}</span>
+    return <span className="text-semantic-subtle">{compact ? '—' : t('jobsNoAppsYet')}</span>
   }
   const label = apps === 1 ? t('jobsAppsOne') : t('jobsAppsMany', { count: apps })
   return (
     <button
       type="button"
-      className="font-semibold text-[#23211d] underline-offset-4 hover:underline"
+      className="font-semibold text-semantic-ink underline-offset-4 hover:underline"
       aria-label={t('jobsViewCandidatesAria', { title })}
       onClick={(event) => {
         event.stopPropagation()
@@ -152,25 +153,25 @@ function JobMobileCard({
       role="button"
       tabIndex={0}
       aria-label={t('jobsOpenRowAria', { title })}
-      className="group flex min-h-11 cursor-pointer items-center gap-3 border-b border-[#ddd3c1]/70 px-3 py-3 text-start last:border-b-0 hover:bg-white/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
+      className="group flex min-h-11 cursor-pointer items-center gap-3 border-b border-semantic-line/70 px-3 py-3 text-start last:border-b-0 hover:bg-white/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink/30"
       onClick={openManage}
       onKeyDown={rowKeyHandlers(openManage)}
     >
       <div className="min-w-0 flex-1 space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="truncate text-sm font-semibold text-[#23211d]">{title}</span>
+          <span className="truncate text-sm font-semibold text-semantic-ink">{title}</span>
           <Badge tone={jobStatusTone(status)}>{jobStatusLabel(status, locale)}</Badge>
         </div>
-        {meta ? <div className="truncate text-xs text-[#716a5e]">{meta}</div> : null}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#716a5e]">
+        {meta ? <div className="truncate text-xs text-semantic-subtle">{meta}</div> : null}
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-semantic-subtle">
           <ApplicantsControl job={job} locale={locale} title={title} onViewCandidates={onViewCandidates} />
           {capacity.text !== '—' ? (
-            <span className={capacity.overdue ? 'font-medium text-[#9a3412]' : undefined}>{capacity.text}</span>
+            <span className={capacity.overdue ? 'font-medium text-semantic-danger-ink' : undefined}>{capacity.text}</span>
           ) : null}
           {owner !== '—' ? <span>{owner}</span> : null}
         </div>
       </div>
-      <Chevron className="h-4 w-4 shrink-0 text-[#8a8274] opacity-70 group-hover:opacity-100" aria-hidden />
+      <Chevron className="h-4 w-4 shrink-0 text-semantic-mist opacity-70 group-hover:opacity-100" aria-hidden />
     </div>
   )
 }
@@ -181,7 +182,7 @@ export const JOBS_DESKTOP_GRID_CLASS =
 
 const JOBS_DESKTOP_CELL = 'min-w-0 px-3 py-3 text-start'
 const JOBS_DESKTOP_HEADER_CELL =
-  'min-w-0 px-3 py-3 text-start text-[11px] font-semibold uppercase tracking-[0.08em] text-[#8a8274]'
+  'min-w-0 px-3 py-3 text-start text-[11px] font-semibold uppercase tracking-[0.08em] text-semantic-mist'
 
 function JobDesktopTable({
   positions,
@@ -206,7 +207,7 @@ function JobDesktopTable({
       role="table"
       aria-label={t('jobsOpeningsList')}
     >
-      <div className={`${JOBS_DESKTOP_GRID_CLASS} border-b border-[#ddd3c1]/80`} role="row">
+      <div className={`${JOBS_DESKTOP_GRID_CLASS} border-b border-semantic-line/80`} role="row">
         <div className={JOBS_DESKTOP_HEADER_CELL} role="columnheader">{t('jobsColJob')}</div>
         <div className={JOBS_DESKTOP_HEADER_CELL} role="columnheader">{t('jobsColStatus')}</div>
         <div className={JOBS_DESKTOP_HEADER_CELL} role="columnheader">{t('jobsColApps')}</div>
@@ -229,13 +230,13 @@ function JobDesktopTable({
             role="button"
             tabIndex={0}
             aria-label={t('jobsOpenRowAria', { title })}
-            className={`${JOBS_DESKTOP_GRID_CLASS} cursor-pointer border-b border-[#ddd3c1]/70 last:border-b-0 hover:bg-white/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink/30`}
+            className={`${JOBS_DESKTOP_GRID_CLASS} cursor-pointer border-b border-semantic-line/70 last:border-b-0 hover:bg-white/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ink/30`}
             onClick={openManage}
             onKeyDown={rowKeyHandlers(openManage)}
           >
             <div className={JOBS_DESKTOP_CELL} role="cell">
-              <div className="truncate font-semibold text-[#23211d]">{title}</div>
-              {meta ? <div className="truncate text-xs text-[#716a5e]">{meta}</div> : null}
+              <div className="truncate font-semibold text-semantic-ink">{title}</div>
+              {meta ? <div className="truncate text-xs text-semantic-subtle">{meta}</div> : null}
             </div>
             <div className={JOBS_DESKTOP_CELL} role="cell" data-testid="jobs-status-cell">
               <Badge tone={jobStatusTone(status)}>{jobStatusLabel(status, locale)}</Badge>
@@ -250,15 +251,15 @@ function JobDesktopTable({
               />
             </div>
             <div
-              className={`${JOBS_DESKTOP_CELL} truncate text-[#716a5e] ${capacity.overdue ? 'font-medium text-[#9a3412]' : ''}`}
+              className={`${JOBS_DESKTOP_CELL} truncate text-semantic-subtle ${capacity.overdue ? 'font-medium text-semantic-danger-ink' : ''}`}
               role="cell"
             >
               {capacity.text}
             </div>
-            <div className={`${JOBS_DESKTOP_CELL} truncate text-[#716a5e]`} role="cell">
+            <div className={`${JOBS_DESKTOP_CELL} truncate text-semantic-subtle`} role="cell">
               {owner}
             </div>
-            <div className="px-0 py-3 text-center text-[#8a8274]" role="cell" aria-hidden>
+            <div className="px-0 py-3 text-center text-semantic-mist" role="cell" aria-hidden>
               <Chevron className="inline-block h-4 w-4 align-middle" />
             </div>
           </div>
@@ -274,26 +275,26 @@ function JobsDesktopSkeleton() {
       {Array.from({ length: 5 }).map((_, index) => (
         <div
           key={`desk-sk-${index}`}
-          className={`${JOBS_DESKTOP_GRID_CLASS} animate-pulse border-b border-[#ddd3c1]/50 last:border-b-0`}
+          className={`${JOBS_DESKTOP_GRID_CLASS} animate-pulse border-b border-semantic-line/50 last:border-b-0`}
         >
           <div className={JOBS_DESKTOP_CELL}>
-            <div className="h-4 w-3/5 rounded bg-[#eee5d4]" />
-            <div className="mt-2 h-3 w-2/5 rounded bg-[#f3ebe0]" />
+            <div className="h-4 w-3/5 rounded bg-semantic-accent-soft" />
+            <div className="mt-2 h-3 w-2/5 rounded bg-semantic-accent-soft" />
           </div>
           <div className={JOBS_DESKTOP_CELL}>
-            <div className="h-5 w-16 rounded-full bg-[#eee5d4]" />
+            <div className="h-5 w-16 rounded-full bg-semantic-accent-soft" />
           </div>
           <div className={JOBS_DESKTOP_CELL}>
-            <div className="h-3 w-8 rounded bg-[#eee5d4]" />
+            <div className="h-3 w-8 rounded bg-semantic-accent-soft" />
           </div>
           <div className={JOBS_DESKTOP_CELL}>
-            <div className="h-3 w-24 rounded bg-[#eee5d4]" />
+            <div className="h-3 w-24 rounded bg-semantic-accent-soft" />
           </div>
           <div className={JOBS_DESKTOP_CELL}>
-            <div className="h-3 w-16 rounded bg-[#eee5d4]" />
+            <div className="h-3 w-16 rounded bg-semantic-accent-soft" />
           </div>
           <div className="px-0 py-3 text-center">
-            <div className="mx-auto h-3 w-3 rounded bg-[#eee5d4]" />
+            <div className="mx-auto h-3 w-3 rounded bg-semantic-accent-soft" />
           </div>
         </div>
       ))}
@@ -439,10 +440,10 @@ export function JobsPage({
       <div aria-busy="true" aria-label={t('jobsLoadingLabel')}>
         <div className="space-y-0 px-1 md:hidden">
           {Array.from({ length: 5 }).map((_, index) => (
-            <div className="animate-pulse border-b border-[#ddd3c1]/50 px-3 py-3 last:border-b-0" key={`sk-${index}`}>
-              <div className="h-4 w-2/5 rounded bg-[#eee5d4]" />
-              <div className="mt-2 h-3 w-1/3 rounded bg-[#f3ebe0]" />
-              <div className="mt-2 h-3 w-1/4 rounded bg-[#f3ebe0]" />
+            <div className="animate-pulse border-b border-semantic-line/50 px-3 py-3 last:border-b-0" key={`sk-${index}`}>
+              <div className="h-4 w-2/5 rounded bg-semantic-accent-soft" />
+              <div className="mt-2 h-3 w-1/3 rounded bg-semantic-accent-soft" />
+              <div className="mt-2 h-3 w-1/4 rounded bg-semantic-accent-soft" />
             </div>
           ))}
         </div>
@@ -531,16 +532,15 @@ export function JobsPage({
         </div>
       </div>
 
-      <section className="rounded-[var(--radius-wf-panel)] bg-wf-surface p-4 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset] sm:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className="min-w-0 px-1">
-            <h2 className="text-[15px] font-semibold tracking-[-0.025em] text-[#23211d]">{t('jobsOpeningsList')}</h2>
-            <p className="mt-0.5 text-xs text-[#716a5e]">{description}</p>
-          </div>
+      <HrSection
+        title={t('jobsOpeningsList')}
+        description={description}
+        trailing={
           <div className="w-full sm:max-w-xs">
             <SearchInput onChange={onQueryChange} placeholder={t('jobsSearchPlaceholder')} value={query} />
           </div>
-        </div>
+        }
+      >
 
         {showStatusTilesShell ? (
           <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4" data-testid="jobs-status-tiles">
@@ -599,7 +599,7 @@ export function JobsPage({
                 key={chip.value || 'all'}
                 type="button"
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                  active ? 'bg-[#23211d] text-white' : 'bg-[#f8f3e9] text-[#716a5e] hover:bg-[#eee5d4]'
+                  active ? 'bg-semantic-ink text-white' : 'bg-semantic-surface-raised text-semantic-subtle hover:bg-semantic-accent-soft'
                 }`}
                 aria-pressed={active}
                 onClick={() => onStatusFilterChange(chip.value)}
@@ -610,7 +610,7 @@ export function JobsPage({
           })}
           <button
             type="button"
-            className="rounded-full px-3 py-1.5 text-xs font-semibold text-[#716a5e] underline-offset-4 hover:underline"
+            className="rounded-full px-3 py-1.5 text-xs font-semibold text-semantic-subtle underline-offset-4 hover:underline"
             aria-expanded={moreFiltersOpen}
             onClick={() => setMoreFiltersOpen((open) => !open)}
           >
@@ -619,7 +619,7 @@ export function JobsPage({
           {filtersActive || isSearching ? (
             <button
               type="button"
-              className="rounded-full px-3 py-1.5 text-xs font-semibold text-[#716a5e] underline-offset-4 hover:underline"
+              className="rounded-full px-3 py-1.5 text-xs font-semibold text-semantic-subtle underline-offset-4 hover:underline"
               onClick={clearFilters}
             >
               {t('jobsClearFilters')}
@@ -630,7 +630,7 @@ export function JobsPage({
         {moreFiltersOpen ? (
           <div className="mt-3 flex flex-wrap gap-2 px-1">
             <select
-              className="rounded-xl border border-[#e8dfd0] bg-white px-3 py-2 text-sm"
+              className="rounded-xl border border-semantic-line bg-white px-3 py-2 text-sm"
               onChange={(event) => onDepartmentFilterChange(event.target.value)}
               value={departmentFilter}
               aria-label={t('jobsFilterDepartment')}
@@ -641,7 +641,7 @@ export function JobsPage({
               ))}
             </select>
             <select
-              className="rounded-xl border border-[#e8dfd0] bg-white px-3 py-2 text-sm"
+              className="rounded-xl border border-semantic-line bg-white px-3 py-2 text-sm"
               onChange={(event) => onLocationFilterChange(event.target.value)}
               value={locationFilter}
               aria-label={t('jobsFilterLocation')}
@@ -652,7 +652,7 @@ export function JobsPage({
               ))}
             </select>
             <select
-              className="rounded-xl border border-[#e8dfd0] bg-white px-3 py-2 text-sm"
+              className="rounded-xl border border-semantic-line bg-white px-3 py-2 text-sm"
               onChange={(event) => onDeadlineFilterChange(event.target.value)}
               value={deadlineFilter}
               aria-label={t('jobsFilterDeadline')}
@@ -662,14 +662,14 @@ export function JobsPage({
               <option value="overdue">{t('jobsDeadlineOverdue')}</option>
               <option value="none">{t('jobsDeadlineNone')}</option>
             </select>
-            <label className="inline-flex items-center gap-2 rounded-xl border border-[#e8dfd0] bg-white px-3 py-2 text-sm">
+            <label className="inline-flex items-center gap-2 rounded-xl border border-semantic-line bg-white px-3 py-2 text-sm">
               <input checked={remainingOnly} onChange={(event) => onRemainingOnlyChange(event.target.checked)} type="checkbox" />
               {t('jobsFilterRemaining')}
             </label>
           </div>
         ) : null}
 
-        <div className="mt-4 overflow-hidden rounded-[1.1rem] border border-[#e8dfd0] bg-[#f8f3e9]/80">
+        <div className="mt-4 overflow-hidden rounded-[1.1rem] border border-semantic-line bg-semantic-surface-raised/80">
           {listBody}
           {!loading || jobsData ? (
             <LoadMoreBar
@@ -683,7 +683,7 @@ export function JobsPage({
             />
           ) : null}
         </div>
-      </section>
+      </HrSection>
     </div>
   )
 }

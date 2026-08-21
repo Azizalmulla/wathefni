@@ -322,10 +322,10 @@ export function ReportsPage({
       <ReportsProfiler id="overview">
         <section className="space-y-4">
           <header>
-            <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-[#23211d]">{reportsCopy(locale, 'overview')}</h2>
-            <p className="mt-1 text-sm text-[#716a5e]">{reportsCopy(locale, 'overview_sub')}</p>
+            <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-semantic-ink">{reportsCopy(locale, 'overview')}</h2>
+            <p className="mt-1 text-sm text-semantic-subtle">{reportsCopy(locale, 'overview_sub')}</p>
           </header>
-          <div className="overflow-hidden rounded-[1.45rem] border border-[#e8dfd0]/80 bg-[#fffaf0]/90 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]">
+          <div className="overflow-hidden rounded-[1.45rem] border border-semantic-line/80 bg-semantic-surface/90 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset]">
             <div className="grid md:grid-cols-2 xl:grid-cols-3">
               <QuietMetric accent="priority" label={reportsCopy(locale, 'open_roles')} value={`${openRoles}`} />
               <QuietMetric accent="follow" label={reportsCopy(locale, 'active_applications')} value={`${activeApplications}`} />
@@ -341,10 +341,10 @@ export function ReportsPage({
       <ReportsProfiler id="breakdowns">
         <section className="space-y-4">
           <header>
-            <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-[#23211d]">{reportsCopy(locale, 'breakdowns')}</h2>
-            <p className="mt-1 text-sm text-[#716a5e]">{reportsCopy(locale, 'breakdowns_sub')}</p>
+            <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-semantic-ink">{reportsCopy(locale, 'breakdowns')}</h2>
+            <p className="mt-1 text-sm text-semantic-subtle">{reportsCopy(locale, 'breakdowns_sub')}</p>
           </header>
-          <div className="rounded-[1.45rem] border border-[#e8dfd0]/80 bg-[#fffaf0]/90 p-5 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset] sm:p-6">
+          <div className="rounded-[1.45rem] border border-semantic-line/80 bg-semantic-surface/90 p-5 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset] sm:p-6">
             <div className="grid gap-8 lg:grid-cols-2">
               <ReportBreakdown emptyText={reportsCopy(locale, 'no_stages')} locale={locale} rows={stageRows} title={reportsCopy(locale, 'stage')} />
               {assessmentEnabled ? (
@@ -372,11 +372,11 @@ export function ReportsPage({
       <ReportsProfiler id="exports">
         <section className="space-y-4">
           <header>
-            <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-[#23211d]">{reportsCopy(locale, 'exports')}</h2>
-            <p className="mt-1 text-sm text-[#716a5e]">{reportsCopy(locale, 'exports_sub')}</p>
+            <h2 className="text-[15px] font-semibold tracking-[-0.02em] text-semantic-ink">{reportsCopy(locale, 'exports')}</h2>
+            <p className="mt-1 text-sm text-semantic-subtle">{reportsCopy(locale, 'exports_sub')}</p>
           </header>
-          <div className="rounded-[1.45rem] border border-[#e8dfd0]/80 bg-[#fffaf0]/90 px-5 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset] sm:px-6">
-            <div className="divide-y divide-[#e8dfd0]/70">
+          <div className="rounded-[1.45rem] border border-semantic-line/80 bg-semantic-surface/90 px-5 shadow-[0_1px_0_rgba(255,255,255,0.8)_inset] sm:px-6">
+            <div className="divide-y divide-semantic-line/70">
               {exportCards.map((card) => (
                 <ExportCard
                   count={card.count}
@@ -389,7 +389,7 @@ export function ReportsPage({
                 />
               ))}
               {!canExportReports ? (
-                <div className="py-4 text-sm leading-6 text-[#716a5e]">
+                <div className="py-4 text-sm leading-6 text-semantic-subtle">
                   {reportsCopy(locale, 'downloads_disabled')}
                 </div>
               ) : null}
@@ -419,12 +419,12 @@ function QuietMetric({
           ? 'bg-wf-accent-assess'
           : 'bg-wf-accent-follow'
   return (
-    <div className="border-b border-[#e8dfd0]/70 p-4 last:border-b-0 md:border-e md:odd:[&:nth-last-child(-n+2)]:border-b-0 xl:border-b xl:[&:nth-child(3n)]:border-e-0 xl:[&:nth-last-child(-n+3)]:border-b-0">
+    <div className="border-b border-semantic-line/70 p-4 last:border-b-0 md:border-e md:odd:[&:nth-last-child(-n+2)]:border-b-0 xl:border-b xl:[&:nth-child(3n)]:border-e-0 xl:[&:nth-last-child(-n+3)]:border-b-0">
       <div className="flex items-start gap-2.5">
         <span aria-hidden className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${mark}`} />
         <div className="min-w-0">
-          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8a8274]">{label}</div>
-          <div className="mt-1.5 break-words text-[1.65rem] font-semibold tracking-[-0.04em] text-[#23211d]">{value || '—'}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-semantic-mist">{label}</div>
+          <div className="mt-1.5 break-words text-[1.65rem] font-semibold tracking-[-0.04em] text-semantic-ink">{value || '—'}</div>
         </div>
       </div>
     </div>
@@ -446,25 +446,25 @@ export function ReportBreakdown({
   const remaining = rows.length - shown.length
   return (
     <div className="min-w-0">
-      <div className="pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#8a8274]">{title}</div>
+      <div className="pb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-semantic-mist">{title}</div>
       <div className="space-y-0">
         {rows.length ? (
           shown.map((row) => (
             <div
-              className="flex items-center justify-between gap-3 border-b border-[#e8dfd0]/55 py-2.5 text-sm last:border-0"
+              className="flex items-center justify-between gap-3 border-b border-semantic-line/55 py-2.5 text-sm last:border-0"
               key={row.label}
             >
-              <span className="min-w-0 truncate text-[#716a5e]">{row.label}</span>
-              <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-[#23211d] px-2 text-[11px] font-semibold text-white">
+              <span className="min-w-0 truncate text-semantic-subtle">{row.label}</span>
+              <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-semantic-ink px-2 text-[11px] font-semibold text-white">
                 {row.count}
               </span>
             </div>
           ))
         ) : (
-          <div className="py-2 text-sm text-[#716a5e]">{emptyText}</div>
+          <div className="py-2 text-sm text-semantic-subtle">{emptyText}</div>
         )}
         {remaining > 0 ? (
-          <div className="pt-2 text-xs text-[#8a8274]">
+          <div className="pt-2 text-xs text-semantic-mist">
             +{remaining} {reportsCopy(locale, 'more')}
           </div>
         ) : null}
@@ -495,7 +495,7 @@ function ExportCard({
         <div className="mt-0.5 text-sm leading-6 text-subtle">{description}</div>
       </div>
       <div className="flex shrink-0 items-center gap-3">
-        <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-[#23211d] px-2 text-[11px] font-semibold text-white">
+        <span className="inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-semantic-ink px-2 text-[11px] font-semibold text-white">
           {count}
         </span>
         <Button disabled={disabled} onClick={onExport} size="sm" variant="secondary">

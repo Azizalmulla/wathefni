@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SendResultPanel, type OutboundSendResult } from '@/components/SendResultPanel'
@@ -40,8 +41,8 @@ export type AssessmentReportPresentation = {
 function ScoreStat({ label, value }: { label: string; value?: number | null }) {
   return (
     <div>
-      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#716a5e]">{label}</div>
-      <div className="mt-1 text-xl font-semibold text-[#23211d]">{value == null ? '—' : `${value}%`}</div>
+      <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-semantic-subtle">{label}</div>
+      <div className="mt-1 text-xl font-semibold text-semantic-ink">{value == null ? '—' : `${value}%`}</div>
     </div>
   )
 }
@@ -83,19 +84,19 @@ export function AssessmentReportPage({
       role="dialog"
     >
       <div
-        className="mx-auto max-w-3xl rounded-[1.6rem] border border-[#e8dfd0] bg-[#fffaf0] p-5 shadow-[0_28px_80px_rgba(24,20,15,0.22)] sm:p-7"
+        className="mx-auto max-w-3xl rounded-[1.6rem] border border-semantic-line bg-semantic-surface p-5 shadow-[0_28px_80px_rgba(24,20,15,0.22)] sm:p-7"
         onClick={(e) => e.stopPropagation()}
         ref={panelRef}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-[#716a5e]">
+            <div className="text-xs font-semibold uppercase tracking-[0.16em] text-semantic-subtle">
               {isAr ? 'تقرير التقييم' : 'Assessment report'}
             </div>
-            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-[#23211d]">
+            <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-semantic-ink">
               {presentation?.candidate?.name || attempt.candidate_name || attempt.phone || (isAr ? 'مرشح' : 'Candidate')}
             </h2>
-            <p className="mt-1 text-sm text-[#716a5e]">
+            <p className="mt-1 text-sm text-semantic-subtle">
               {presentation?.job?.position_title || attempt.position_title || attempt.position_code || (isAr ? 'الوظيفة' : 'Role')}
             </p>
           </div>
@@ -108,22 +109,22 @@ export function AssessmentReportPage({
         </div>
 
         {loading ? (
-          <p className="mt-4 text-sm text-[#716a5e]">{isAr ? 'جاري تحميل التقرير…' : 'Loading report…'}</p>
+          <p className="mt-4 text-sm text-semantic-subtle">{isAr ? 'جاري تحميل التقرير…' : 'Loading report…'}</p>
         ) : loadError ? (
           <p className="mt-4 text-sm text-rose-700">
             {isAr ? 'تعذّر تحميل التقرير. حاول مرة أخرى.' : 'Could not load the report. Try again.'}
           </p>
         ) : partial ? (
-          <p className="mt-4 text-sm text-[#716a5e]">
+          <p className="mt-4 text-sm text-semantic-subtle">
             {isAr ? 'التقرير قيد التحضير.' : 'Report is being prepared.'}
           </p>
         ) : (
-          <p className="mt-4 text-sm leading-6 text-[#716a5e]">
+          <p className="mt-4 text-sm leading-6 text-semantic-subtle">
             {presentation?.executive_summary || (isAr ? 'التقرير قيد التحضير.' : 'Report is being prepared.')}
           </p>
         )}
 
-        <div className="mt-5 grid grid-cols-2 gap-4 rounded-[1.3rem] border border-[#e8dfd0] bg-white/50 p-4 sm:grid-cols-4">
+        <div className="mt-5 grid grid-cols-2 gap-4 rounded-[1.3rem] border border-semantic-line bg-white/50 p-4 sm:grid-cols-4">
           <ScoreStat label={isAr ? 'النتيجة العامة' : 'Overall'} value={scores.overall} />
           <ScoreStat label={isAr ? 'توافق الوظيفة' : 'Job match'} value={scores.job_match} />
           <ScoreStat label={isAr ? 'القدرة' : 'Ability fit'} value={scores.ability_fit} />
@@ -133,16 +134,16 @@ export function AssessmentReportPage({
         {!loading && !loadError && presentation ? (
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <section>
-              <h3 className="text-sm font-semibold text-[#23211d]">{isAr ? 'نقاط القوة' : 'Strengths'}</h3>
-              <ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-[#716a5e]">
+              <h3 className="text-sm font-semibold text-semantic-ink">{isAr ? 'نقاط القوة' : 'Strengths'}</h3>
+              <ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-semantic-subtle">
                 {(presentation.strengths?.length ? presentation.strengths : [isAr ? 'لا يوجد دليل كافٍ بعد' : 'Not enough evidence yet']).map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
             </section>
             <section>
-              <h3 className="text-sm font-semibold text-[#23211d]">{isAr ? 'مجالات التطوير' : 'Growth areas'}</h3>
-              <ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-[#716a5e]">
+              <h3 className="text-sm font-semibold text-semantic-ink">{isAr ? 'مجالات التطوير' : 'Growth areas'}</h3>
+              <ul className="mt-2 list-disc space-y-1 ps-5 text-sm text-semantic-subtle">
                 {(presentation.growth_areas?.length ? presentation.growth_areas : [isAr ? 'لا يوجد دليل كافٍ بعد' : 'Not enough evidence yet']).map((item) => (
                   <li key={item}>{item}</li>
                 ))}
@@ -153,11 +154,11 @@ export function AssessmentReportPage({
 
         {presentation?.interview_probes?.length ? (
           <section className="mt-5">
-            <h3 className="text-sm font-semibold text-[#23211d]">{isAr ? 'أسئلة مقابلة مقترحة' : 'Structured interview questions'}</h3>
-            <ol className="mt-2 list-decimal space-y-2 ps-5 text-sm leading-6 text-[#716a5e]">
+            <h3 className="text-sm font-semibold text-semantic-ink">{isAr ? 'أسئلة مقابلة مقترحة' : 'Structured interview questions'}</h3>
+            <ol className="mt-2 list-decimal space-y-2 ps-5 text-sm leading-6 text-semantic-subtle">
               {presentation.interview_probes.map((probe, index) => (
                 <li key={`${probe.competency || 'probe'}-${index}`}>
-                  {probe.competency ? <span className="font-medium text-[#23211d]">{probe.competency}: </span> : null}
+                  {probe.competency ? <span className="font-medium text-semantic-ink">{probe.competency}: </span> : null}
                   {probe.question}
                 </li>
               ))}
@@ -165,10 +166,10 @@ export function AssessmentReportPage({
           </section>
         ) : null}
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-[1.3rem] border border-[#e8dfd0] bg-white/50 p-4">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-[1.3rem] border border-semantic-line bg-white/50 p-4">
           <div className="text-sm">
-            <span className="text-[#716a5e]">{isAr ? 'الخطوة التالية:' : 'Next step:'}</span>{' '}
-            <span className="font-medium text-[#23211d]">
+            <span className="text-semantic-subtle">{isAr ? 'الخطوة التالية:' : 'Next step:'}</span>{' '}
+            <span className="font-medium text-semantic-ink">
               {reviewed
                 ? (isAr ? 'التقرير جاهز للاطلاع.' : 'Report is ready to view.')
                 : reportReady
@@ -225,40 +226,34 @@ export function AssessmentAttemptWorkspace({
       role="dialog"
     >
       <aside
-        className="ms-auto flex h-full w-full max-w-3xl flex-col overflow-y-auto border-s border-[#e8dfd0] bg-[#fffaf0] p-6"
+        className="ms-auto flex h-full w-full max-w-3xl flex-col overflow-y-auto border-s border-semantic-line bg-semantic-surface p-6"
         onClick={(e) => e.stopPropagation()}
         ref={panelRef}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-[#e8dfd0] pb-4">
+        <div className="flex items-start justify-between gap-4 border-b border-semantic-line pb-4">
           <div>
-            <h3 className="text-lg font-semibold text-[#23211d]">{attempt.candidate_name || attempt.phone || (isAr ? 'مرشح' : 'Candidate')}</h3>
-            <p className="mt-1 text-sm text-[#716a5e]">{attempt.position_title || attempt.position_code || (isAr ? 'الوظيفة' : 'Role')}</p>
-            <p className="mt-2 text-sm text-[#716a5e]">
+            <h3 className="text-lg font-semibold text-semantic-ink">{attempt.candidate_name || attempt.phone || (isAr ? 'مرشح' : 'Candidate')}</h3>
+            <p className="mt-1 text-sm text-semantic-subtle">{attempt.position_title || attempt.position_code || (isAr ? 'الوظيفة' : 'Role')}</p>
+            <p className="mt-2 text-sm text-semantic-subtle">
               {assessmentStatusLabel(locale, state)}
               {next ? ` · ${assessmentActionLabel(locale, next)}` : ''}
             </p>
           </div>
           <Button onClick={onClose} size="sm" variant="secondary">{isAr ? 'إغلاق' : 'Close'}</Button>
         </div>
-        <nav className="mt-4 flex gap-1 overflow-x-auto rounded-full border border-[#e8dfd0] bg-white/45 p-1">
-          {tabs.map((item) => (
-            <button
-              aria-current={tab === item.id ? 'page' : undefined}
-              className={`whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-semibold transition ${tab === item.id ? 'bg-[#23211d] text-white' : 'text-[#716a5e] hover:bg-white/70 hover:text-[#23211d]'}`}
-              key={item.id}
-              onClick={() => setTab(item.id)}
-              type="button"
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
+        <HrSurfaceTabs
+          ariaLabel={isAr ? 'تفاصيل التقييم' : 'Assessment detail'}
+          className="mt-4"
+          items={tabs.map((item) => ({ id: item.id, label: item.label }))}
+          onChange={setTab}
+          value={tab}
+        />
 
         {tab === 'overview' ? (
           <div className="mt-4 space-y-3 text-sm">
             <div>
-              <span className="text-[#716a5e]">{isAr ? 'الحالة:' : 'State:'}</span>{' '}
-              <span className="font-medium text-[#23211d]">
+              <span className="text-semantic-subtle">{isAr ? 'الحالة:' : 'State:'}</span>{' '}
+              <span className="font-medium text-semantic-ink">
                 {presentation?.display_status
                   ? assessmentStatusLabel(locale, presentation.display_status)
                   : assessmentStatusLabel(locale, state)}
@@ -266,22 +261,22 @@ export function AssessmentAttemptWorkspace({
             </div>
             {presentation?.invitation?.expires_at ? (
               <div>
-                <span className="text-[#716a5e]">{isAr ? 'ينتهي:' : 'Expires:'}</span>{' '}
-                <span className="font-medium text-[#23211d]">{formatDateTime(presentation.invitation.expires_at)}</span>
+                <span className="text-semantic-subtle">{isAr ? 'ينتهي:' : 'Expires:'}</span>{' '}
+                <span className="font-medium text-semantic-ink">{formatDateTime(presentation.invitation.expires_at)}</span>
               </div>
             ) : null}
             <div>
-              <span className="text-[#716a5e]">{isAr ? 'الخطوة التالية:' : 'Next:'}</span>{' '}
-              <span className="font-medium text-[#23211d]">{next ? assessmentActionLabel(locale, next) : '—'}</span>
+              <span className="text-semantic-subtle">{isAr ? 'الخطوة التالية:' : 'Next:'}</span>{' '}
+              <span className="font-medium text-semantic-ink">{next ? assessmentActionLabel(locale, next) : '—'}</span>
             </div>
           </div>
         ) : null}
         {tab === 'delivery' ? (
           <div className="mt-4 space-y-3">
             {sendResult ? <SendResultPanel locale={isAr ? 'ar' : 'en'} result={sendResult} /> : (
-              <div className="text-sm text-[#716a5e]">{isAr ? 'لا يوجد سجل إرسال حديث.' : 'No recent send result.'}</div>
+              <div className="text-sm text-semantic-subtle">{isAr ? 'لا يوجد سجل إرسال حديث.' : 'No recent send result.'}</div>
             )}
-            <div className="text-sm text-[#716a5e]">
+            <div className="text-sm text-semantic-subtle">
               {isAr ? 'حالة التسليم:' : 'Delivery state:'}{' '}
               {assessmentStatusLabel(locale, presentation?.invitation?.delivery_state || attempt.delivery_status)}
             </div>
@@ -290,20 +285,20 @@ export function AssessmentAttemptWorkspace({
         {tab === 'attempt' ? (
           <div className="mt-4 space-y-2 text-sm">
             <div>
-              <span className="text-[#716a5e]">{isAr ? 'الحالة:' : 'Status:'}</span>{' '}
-              <span className="font-medium text-[#23211d]">{assessmentStatusLabel(locale, state)}</span>
+              <span className="text-semantic-subtle">{isAr ? 'الحالة:' : 'Status:'}</span>{' '}
+              <span className="font-medium text-semantic-ink">{assessmentStatusLabel(locale, state)}</span>
             </div>
             <div>
-              <span className="text-[#716a5e]">{isAr ? 'التقدم:' : 'Progress:'}</span>{' '}
-              <span className="font-medium text-[#23211d]">{attempt.answered_count ?? 0}/{attempt.total_items ?? 0}</span>
+              <span className="text-semantic-subtle">{isAr ? 'التقدم:' : 'Progress:'}</span>{' '}
+              <span className="font-medium text-semantic-ink">{attempt.answered_count ?? 0}/{attempt.total_items ?? 0}</span>
             </div>
             <div>
-              <span className="text-[#716a5e]">{isAr ? 'بدأ:' : 'Started:'}</span>{' '}
-              <span className="font-medium text-[#23211d]">{attempt.started_at ? formatDateTime(attempt.started_at) : '—'}</span>
+              <span className="text-semantic-subtle">{isAr ? 'بدأ:' : 'Started:'}</span>{' '}
+              <span className="font-medium text-semantic-ink">{attempt.started_at ? formatDateTime(attempt.started_at) : '—'}</span>
             </div>
             <div>
-              <span className="text-[#716a5e]">{isAr ? 'اكتمل:' : 'Completed:'}</span>{' '}
-              <span className="font-medium text-[#23211d]">{attempt.completed_at ? formatDateTime(attempt.completed_at) : '—'}</span>
+              <span className="text-semantic-subtle">{isAr ? 'اكتمل:' : 'Completed:'}</span>{' '}
+              <span className="font-medium text-semantic-ink">{attempt.completed_at ? formatDateTime(attempt.completed_at) : '—'}</span>
             </div>
           </div>
         ) : null}
@@ -314,19 +309,19 @@ export function AssessmentAttemptWorkspace({
                 {assessmentCopy(locale, 'view_report')}
               </Button>
             ) : (
-              <div className="text-sm text-[#716a5e]">{isAr ? 'التقرير غير جاهز بعد.' : 'Report is not ready yet.'}</div>
+              <div className="text-sm text-semantic-subtle">{isAr ? 'التقرير غير جاهز بعد.' : 'Report is not ready yet.'}</div>
             )}
           </div>
         ) : null}
         {tab === 'activity' ? (
           <div className="mt-4 space-y-2 text-sm">
             <div>
-              <span className="text-[#716a5e]">{isAr ? 'أنشئ:' : 'Created:'}</span>{' '}
-              <span className="font-medium text-[#23211d]">{attempt.created_at ? formatDateTime(attempt.created_at) : '—'}</span>
+              <span className="text-semantic-subtle">{isAr ? 'أنشئ:' : 'Created:'}</span>{' '}
+              <span className="font-medium text-semantic-ink">{attempt.created_at ? formatDateTime(attempt.created_at) : '—'}</span>
             </div>
             <div>
-              <span className="text-[#716a5e]">{isAr ? 'حُدّث:' : 'Updated:'}</span>{' '}
-              <span className="font-medium text-[#23211d]">{attempt.updated_at ? formatDateTime(attempt.updated_at) : '—'}</span>
+              <span className="text-semantic-subtle">{isAr ? 'حُدّث:' : 'Updated:'}</span>{' '}
+              <span className="font-medium text-semantic-ink">{attempt.updated_at ? formatDateTime(attempt.updated_at) : '—'}</span>
             </div>
           </div>
         ) : null}

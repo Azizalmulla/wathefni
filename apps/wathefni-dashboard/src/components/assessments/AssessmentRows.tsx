@@ -52,16 +52,16 @@ export function SendRow({
   secondaryActions?: Array<{ label: string; action: () => void; disabled?: boolean }>
 }) {
   return (
-    <div className="grid gap-3 border-b border-[#e8dfd0] px-4 py-3 text-sm last:border-b-0 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] sm:items-center">
+    <div className="grid gap-3 border-b border-semantic-line px-4 py-3 text-sm last:border-b-0 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto] sm:items-center">
       <div className="min-w-0">
-        <div className="truncate font-semibold text-[#23211d]">{applicationName}</div>
-        <div className="truncate text-xs text-[#716a5e]">
+        <div className="truncate font-semibold text-semantic-ink">{applicationName}</div>
+        <div className="truncate text-xs text-semantic-subtle">
           {[applicationContact, job].filter(Boolean).join(' · ') || '—'}
         </div>
       </div>
       <div className="min-w-0">
         <Badge tone={toneFor(stateLabel)}>{stateLabel}</Badge>
-        {deliveryLabel ? <div className="mt-0.5 truncate text-xs text-[#716a5e]">{deliveryLabel}</div> : null}
+        {deliveryLabel ? <div className="mt-0.5 truncate text-xs text-semantic-subtle">{deliveryLabel}</div> : null}
       </div>
       <div className="flex items-center justify-end gap-2">
         <Button disabled={disabled} onClick={onPrimary} size="sm">
@@ -69,10 +69,10 @@ export function SendRow({
         </Button>
         {secondaryActions?.length ? (
           <details className="relative">
-            <summary className="cursor-pointer list-none rounded-full border border-[#e8dfd0] bg-[#fffaf0] px-3 py-1.5 text-xs text-[#716a5e]">
+            <summary className="cursor-pointer list-none rounded-full border border-semantic-line bg-semantic-surface px-3 py-1.5 text-xs text-semantic-subtle">
               {locale === 'ar' ? 'المزيد' : 'More'}
             </summary>
-            <div className="absolute end-0 z-10 mt-1 grid w-40 gap-1 rounded-xl border border-[#e8dfd0] bg-[#fffaf0] p-1.5">
+            <div className="absolute end-0 z-10 mt-1 grid w-40 gap-1 rounded-xl border border-semantic-line bg-semantic-surface p-1.5">
               {secondaryActions.map((item) => (
                 <Button disabled={item.disabled} key={item.label} onClick={item.action} size="sm" variant="ghost">
                   {item.label}
@@ -149,17 +149,17 @@ export function AttemptRow({
   }
 
   return (
-    <div className="grid gap-3 border-b border-[#e8dfd0] px-4 py-3 text-sm last:border-b-0 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_auto] sm:items-center">
+    <div className="grid gap-3 border-b border-semantic-line px-4 py-3 text-sm last:border-b-0 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)_auto] sm:items-center">
       <div className="min-w-0">
-        <div className="truncate font-semibold text-[#23211d]">{attempt.candidate_name || attempt.phone || (locale === 'ar' ? 'مرشح' : 'Candidate')}</div>
-        <div className="truncate text-xs text-[#716a5e]">
+        <div className="truncate font-semibold text-semantic-ink">{attempt.candidate_name || attempt.phone || (locale === 'ar' ? 'مرشح' : 'Candidate')}</div>
+        <div className="truncate text-xs text-semantic-subtle">
           {[attempt.candidate_email || attempt.phone, attempt.position_title || attempt.position_code].filter(Boolean).join(' · ')}
         </div>
-        {nextLabel ? <div className="mt-1 truncate text-xs text-[#716a5e]">{nextLabel}</div> : null}
+        {nextLabel ? <div className="mt-1 truncate text-xs text-semantic-subtle">{nextLabel}</div> : null}
       </div>
       <div className="min-w-0 space-y-1">
-        <div className="font-medium text-[#23211d]">{progressLabel}</div>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-[#716a5e]">
+        <div className="font-medium text-semantic-ink">{progressLabel}</div>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-semantic-subtle">
           {attempt.percent != null ? <span>{attempt.percent}%</span> : null}
           {state === 'completed' ? <Badge tone={toneFor(reviewLabel)}>{reviewLabel}</Badge> : null}
           {attempt.completed_at ? <span>{formatDateTime(attempt.completed_at)}</span> : null}
@@ -171,10 +171,10 @@ export function AttemptRow({
         </Button>
         {secondary.length ? (
           <details className="relative">
-            <summary className="cursor-pointer list-none rounded-full border border-[#e8dfd0] bg-[#fffaf0] px-3 py-1.5 text-xs text-[#716a5e]">
+            <summary className="cursor-pointer list-none rounded-full border border-semantic-line bg-semantic-surface px-3 py-1.5 text-xs text-semantic-subtle">
               {locale === 'ar' ? 'المزيد' : 'More'}
             </summary>
-            <div className="absolute end-0 z-10 mt-1 grid w-40 gap-1 rounded-xl border border-[#e8dfd0] bg-[#fffaf0] p-1.5">
+            <div className="absolute end-0 z-10 mt-1 grid w-40 gap-1 rounded-xl border border-semantic-line bg-semantic-surface p-1.5">
               {secondary.map((item) => (
                 <Button disabled={item.disabled} key={item.label} onClick={item.action} size="sm" variant="ghost">
                   {item.label}
@@ -202,15 +202,15 @@ export function ReportRow({
   const overall = attempt.percent != null ? `${attempt.percent}%` : '—'
   const reviewLabel = review === 'reviewed' ? assessmentCopy(locale, 'reviewed') : assessmentCopy(locale, 'review_pending')
   return (
-    <div className="grid gap-3 border-b border-[#e8dfd0] px-4 py-3 text-sm last:border-b-0 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)_auto] sm:items-center">
+    <div className="grid gap-3 border-b border-semantic-line px-4 py-3 text-sm last:border-b-0 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,0.8fr)_auto] sm:items-center">
       <div className="min-w-0">
-        <div className="truncate font-semibold text-[#23211d]">{attempt.candidate_name || attempt.phone || (locale === 'ar' ? 'مرشح' : 'Candidate')}</div>
-        <div className="truncate text-xs text-[#716a5e]">
+        <div className="truncate font-semibold text-semantic-ink">{attempt.candidate_name || attempt.phone || (locale === 'ar' ? 'مرشح' : 'Candidate')}</div>
+        <div className="truncate text-xs text-semantic-subtle">
           {[attempt.candidate_email || attempt.phone, attempt.position_title || attempt.position_code].filter(Boolean).join(' · ')}
         </div>
       </div>
       <div className="min-w-0 space-y-1">
-        <div className="font-medium text-[#23211d]">{overall}</div>
+        <div className="font-medium text-semantic-ink">{overall}</div>
         <Badge tone={toneFor(reviewLabel)}>{reviewLabel}</Badge>
       </div>
       <div className="flex justify-end">

@@ -27,6 +27,7 @@ import { customerVisibleBatteryName } from '@/lib/publicBrand'
 import { type RecruitingLocale } from '@/lib/recruitingLifecycle'
 import { AssessmentAttemptWorkspace, AssessmentReportPage, type AssessmentReportPresentation } from '@/components/assessments/AssessmentReportPage'
 import { AttemptRow, ReportRow, SendRow } from '@/components/assessments/AssessmentRows'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { Product2AuthoringPanel } from '@/components/Product2AuthoringPanel'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -279,52 +280,46 @@ export function AssessmentsPage({
   return (
     <div className="space-y-5" dir={isAr ? 'rtl' : 'ltr'}>
       {enabled ? (
-        <div className="flex flex-wrap gap-2">
-          {[
+        <HrSurfaceTabs
+          ariaLabel={isAr ? 'التقييمات' : 'Assessments'}
+          items={[
             { id: 'send', label: assessmentCopy(locale, 'send') },
-            { id: 'attempts', label: assessmentCopy(locale, 'attempts') },
-            { id: 'reports', label: assessmentCopy(locale, 'reports') },
-          ].map((tab) => (
-            <Button
-              key={tab.id}
-              onClick={() => selectTab(tab.id)}
-              size="sm"
-              variant={
-                assessmentTab === tab.id
-                || (tab.id === 'send' && isSendTab)
-                || (tab.id === 'attempts' && isNeedsReviewTab)
-                  ? 'default'
-                  : 'secondary'
-              }
-            >
-              {tab.label}
-              {tab.id === 'attempts' && total && !isNeedsReviewTab && !isReportsTab ? ` (${total})` : ''}
-              {tab.id === 'reports' && reportReadyCount ? ` (${reportReadyCount})` : ''}
-            </Button>
-          ))}
-          {needsReviewCount > 0 || isNeedsReviewTab ? (
-            <Button
-              onClick={() => selectTab('needs_review')}
-              size="sm"
-              variant={isNeedsReviewTab ? 'default' : 'secondary'}
-            >
-              {assessmentCopy(locale, 'needs_review')}
-              {needsReviewCount > 0 ? ` (${needsReviewCount})` : ''}
-            </Button>
-          ) : (
-            // Reserve chip width while attempts load so the tab row does not shift.
-            attemptsLoading ? (
-              <span aria-hidden className="inline-flex h-8 min-w-[7.5rem] rounded-md bg-[#f0ebe3] opacity-60" />
-            ) : null
-          )}
-        </div>
+            {
+              id: 'attempts',
+              label: assessmentCopy(locale, 'attempts'),
+              count: total && !isNeedsReviewTab && !isReportsTab ? total : undefined,
+            },
+            {
+              id: 'reports',
+              label: assessmentCopy(locale, 'reports'),
+              count: reportReadyCount || undefined,
+            },
+            ...(needsReviewCount > 0 || isNeedsReviewTab
+              ? [{
+                  id: 'needs_review',
+                  label: assessmentCopy(locale, 'needs_review'),
+                  count: needsReviewCount || undefined,
+                }]
+              : []),
+          ]}
+          onChange={selectTab}
+          testId="assessment-primary-tabs"
+          trailing={
+            needsReviewCount > 0 || isNeedsReviewTab
+              ? null
+              : attemptsLoading
+                ? <span aria-hidden className="inline-flex h-8 min-w-[7.5rem] rounded-md bg-semantic-accent-soft opacity-60" />
+                : null
+          }
+          value={isNeedsReviewTab ? 'needs_review' : isReportsTab ? 'reports' : isAttemptsTab ? 'attempts' : 'send'}
+        />
       ) : null}
 
       {!enabled ? (
         <Card tone="board">
           <CardHeader>
-            <CardTitle className="text-[#23211d]">{isAr ? 'التقييمات' : 'Assessments'}</CardTitle>
-            <CardDescription className="text-[#716a5e]">
+            <CardTitle className="text-semantic-ink">{isAr ? 'التقييمات' : 'Assessments'}</CardTitle>
+            <CardDescription className="text-semantic-subtle">
               {isAr
                 ? 'التقييمات غير مفعّلة لهذه الشركة بعد. يمكنك متابعة المرشحين والسير الذاتية والمقابلات والترتيب.'
                 : 'Assessments are not enabled for this company yet. You can still review candidates, CVs, interviews, and ranking evidence.'}
@@ -334,14 +329,14 @@ export function AssessmentsPage({
       ) : null}
 
       {staleHint ? (
-        <div className="rounded-xl border border-[#e8dfd0] bg-[#fffaf0] px-3 py-2 text-xs text-[#716a5e]">
+        <div className="rounded-xl border border-semantic-line bg-semantic-surface px-3 py-2 text-xs text-semantic-subtle">
           {isAr ? 'جاري تحديث البيانات…' : 'Updating…'}
         </div>
       ) : null}
 
       {enabled && canSeeSetup ? (
-        <details className="rounded-2xl border border-[#e8dfd0] bg-[#f8f3e9]/70 p-3">
-          <summary className="cursor-pointer text-sm font-semibold text-[#716a5e]">
+        <details className="rounded-2xl border border-semantic-line bg-semantic-surface-raised/70 p-3">
+          <summary className="cursor-pointer text-sm font-semibold text-semantic-subtle">
             {isAr ? 'إعداد التقييم (ثانوي)' : 'Assessment setup (secondary)'}
           </summary>
           <div className="mt-3">
@@ -494,11 +489,11 @@ export function AssessmentsPage({
             tone="board"
           >
             <CardHeader className={isNeedsReviewTab ? 'mb-4 border-b border-black/5 pb-4' : undefined}>
-              <CardTitle className={isNeedsReviewTab ? 'text-inherit' : 'text-[#23211d]'}>
+              <CardTitle className={isNeedsReviewTab ? 'text-inherit' : 'text-semantic-ink'}>
                 {isNeedsReviewTab ? assessmentCopy(locale, 'needs_review') : (isAr ? 'المحاولات الأخيرة' : 'Recent attempts')}
                 {total ? ` (${total})` : ''}
               </CardTitle>
-              <CardDescription className={isNeedsReviewTab ? 'text-inherit opacity-75' : 'text-[#716a5e]'}>
+              <CardDescription className={isNeedsReviewTab ? 'text-inherit opacity-75' : 'text-semantic-subtle'}>
                 {isNeedsReviewTab
                   ? (isAr
                     ? 'محاولات مكتملة بانتظار مراجعة الموارد البشرية (نفس شرط العدّ في الواجهة الخلفية).'
@@ -512,12 +507,12 @@ export function AssessmentsPage({
               {attemptsError ? (
                 <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} onRetry={onRefresh} testId="assessments-attempts-state" />
               ) : attemptsLoading && !attempts.length ? (
-                <div className="flex items-center gap-2 text-sm text-[#716a5e]">
+                <div className="flex items-center gap-2 text-sm text-semantic-subtle">
                   <Loader2 className="animate-spin" size={16} />
                   {isAr ? 'جاري التحميل…' : 'Loading…'}
                 </div>
               ) : attempts.length ? (
-                <div className={`overflow-x-auto rounded-[1.2rem] ${isNeedsReviewTab ? 'bg-white/55' : 'border border-[#e8dfd0] bg-white/40'}`}>
+                <div className={`overflow-x-auto rounded-[1.2rem] ${isNeedsReviewTab ? 'bg-white/55' : 'border border-semantic-line bg-white/40'}`}>
                   {attempts.map((attempt) => (
                     <AttemptRow
                       attempt={attempt}
@@ -543,7 +538,7 @@ export function AssessmentsPage({
                 />
               )}
               {total ? (
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-[#716a5e]">
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-semantic-subtle">
                   <div>
                     {isAr
                       ? `عرض ${offset + 1}-${Math.min(offset + attempts.length, total)} من ${total}`
@@ -568,11 +563,11 @@ export function AssessmentsPage({
         <AssessmentsSectionProfiler id="reports">
           <Card tone="board">
             <CardHeader>
-              <CardTitle className="text-[#23211d]">
+              <CardTitle className="text-semantic-ink">
                 {assessmentCopy(locale, 'reports')}
                 {reportReadyCount ? ` (${reportReadyCount})` : ''}
               </CardTitle>
-              <CardDescription className="text-[#716a5e]">
+              <CardDescription className="text-semantic-subtle">
                 {isAr
                   ? `تقارير مكتملة ضمن نفس النطاق (${reportReadyCount} جاهز).`
                   : `Completed reports under the same scoped total (${reportReadyCount} ready).`}
@@ -582,12 +577,12 @@ export function AssessmentsPage({
               {attemptsError ? (
                 <ResourceState kind="error" locale={isAr ? 'ar' : 'en'} onRetry={onRefresh} testId="assessments-reports-state" />
               ) : attemptsLoading && !attempts.length ? (
-                <div className="flex items-center gap-2 text-sm text-[#716a5e]">
+                <div className="flex items-center gap-2 text-sm text-semantic-subtle">
                   <Loader2 className="animate-spin" size={16} />
                   {isAr ? 'جاري التحميل…' : 'Loading…'}
                 </div>
               ) : attempts.length ? (
-                <div className="overflow-x-auto rounded-[1.35rem] border border-[#e8dfd0] bg-white/40">
+                <div className="overflow-x-auto rounded-[1.35rem] border border-semantic-line bg-white/40">
                   {attempts.map((attempt) => (
                     <ReportRow attempt={attempt} key={attempt.attempt_id} locale={locale} onViewReport={() => void openReport(attempt)} />
                   ))}
@@ -596,7 +591,7 @@ export function AssessmentsPage({
                 <EmptyState text={isAr ? 'لا توجد تقارير تقييم مكتملة بعد.' : 'No completed assessment reports yet.'} />
               )}
               {total ? (
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-[#716a5e]">
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3 text-sm text-semantic-subtle">
                   <div>
                     {isAr
                       ? `عرض ${offset + 1}-${Math.min(offset + attempts.length, total)} من ${total}`
@@ -619,7 +614,7 @@ export function AssessmentsPage({
 
       {enabled && config && canSeeSetup ? (
         <details
-          className="rounded-2xl border border-[#e8dfd0] bg-[#fffaf0]/85 p-4"
+          className="rounded-2xl border border-semantic-line bg-semantic-surface/85 p-4"
           data-testid="assessment-configuration"
         >
           <summary
@@ -628,10 +623,10 @@ export function AssessmentsPage({
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
-                <div className="text-sm font-semibold text-[#23211d]">
+                <div className="text-sm font-semibold text-semantic-ink">
                   {isAr ? 'إعداد التقييم' : 'Assessment configuration'}
                 </div>
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-[#716a5e]">
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-medium text-semantic-subtle">
                   <span data-testid="assessment-configuration-ready">{setupReadyLabel}</span>
                   <span aria-hidden className="opacity-40">·</span>
                   <span data-testid="assessment-configuration-questions">{questionsLabel}</span>
@@ -641,14 +636,14 @@ export function AssessmentsPage({
                   <span data-testid="assessment-configuration-refreshed">{lastRefreshedLabel}</span>
                 </div>
               </div>
-              <div className="shrink-0 text-xs font-semibold text-[#8a8274]">
+              <div className="shrink-0 text-xs font-semibold text-semantic-mist">
                 {isAr ? 'التفاصيل للإداريين' : 'Admin details'}
               </div>
             </div>
           </summary>
-          <div className="mt-4 border-t border-[#e8dfd0]/80 pt-4">
+          <div className="mt-4 border-t border-semantic-line/80 pt-4">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div className="text-sm leading-6 text-[#716a5e]">
+              <div className="text-sm leading-6 text-semantic-subtle">
                 {isAr
                   ? 'التفاصيل التقنية متاحة لمسؤولي الموارد البشرية للتحقق من المعايرة وتغطية المحتوى.'
                   : 'Technical details are available for HR admins who need to check assessment calibration and content coverage.'}

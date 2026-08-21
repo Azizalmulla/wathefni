@@ -91,11 +91,11 @@ describe('Interviews UI refinement', () => {
     for (const btn of screen.getAllByRole('button', { name: /Needs feedback/i })) {
       expect(btn).toHaveTextContent('1')
     }
-    expect(screen.getByRole('button', { name: /^Video/i })).toHaveTextContent('5')
+    expect(screen.getByRole('tab', { name: /^Video/i })).toHaveTextContent('5')
     for (const btn of screen.getAllByRole('button', { name: /Completed/i })) {
       expect(btn).toHaveTextContent('1')
     }
-    expect(screen.getByRole('button', { name: /^All/i })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: /^All/i })).toBeInTheDocument()
     // Secondary queues live under More (still in DOM), not as primary pills.
     expect(screen.getByText('More')).toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: /Upcoming/i }).length).toBeGreaterThan(0)

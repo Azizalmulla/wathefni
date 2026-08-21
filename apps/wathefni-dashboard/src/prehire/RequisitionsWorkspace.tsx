@@ -2,10 +2,11 @@
  * Requisitions Surface Wave — HR Web (Pre-Hiring).
  * Thin client over frozen requisitions authority + SoD approve/reject.
  */
-import { BriefcaseBusiness, CheckCircle2, Loader2, RefreshCw, XCircle } from 'lucide-react'
-import { useCallback, useEffect, useState } from 'react'
+import { CheckCircle2, Loader2, RefreshCw, XCircle } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/field'
 import { StatusPill } from '@/components/ui/page-chrome'
@@ -17,6 +18,7 @@ import {
   postRequisitionCreate,
   postRequisitionTransition,
 } from '@/lib/api'
+import { useUrlBackedParam, useUrlBackedTab } from '@/lib/hrWebUrlTab'
 import { cn } from '@/lib/utils'
 import { useEmployees360Locale, WorkflowEmpty } from '@/posthire/employees360/chrome'
 import type { DashboardAccess } from '@/types'
@@ -47,7 +49,6 @@ type ReqRow = {
 function copy(isAr: boolean) {
   return isAr
     ? {
-        title: 'طلبات التوظيف',
         subtitle: 'الموافقة على الاحتياج قبل نشر الوظائف — من يمنع التعيين؟',
         attention: 'يحتاج موافقة',
         draft: 'مسودة',
@@ -72,7 +73,6 @@ function copy(isAr: boolean) {
         audit: 'السجل',
       }
     : {
-        title: 'Requisitions',
         subtitle: 'Approve headcount before jobs publish — who is blocking hire?',
         attention: 'Needs approval',
         draft: 'Draft',
@@ -105,6 +105,8 @@ function tone(status: string): 'success' | 'warning' | 'danger' | 'neutral' | 'i
   return 'info'
 }
 
+type ReqTab = 'attention' | 'draft' | 'pending_approval' | 'approved' | 'open' | 'filled'
+
 export function RequisitionsWorkspace({
   access,
   permissions,
@@ -116,11 +118,12 @@ export function RequisitionsWorkspace({
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
   const c = copy(isAr)
+  const paintedRef = useRef(false)
   const [loading, setLoading] = useState(true)
   const [rows, setRows] = useState<ReqRow[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
-  const [filter, setFilter] = useState('attention')
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [filter, setFilter] = useUrlBackedTab('requisitions', ['attention', 'draft', 'pending_approval', 'approved', 'open', 'filled'] as const, 'attention')
+  const [selectedId, setSelectedId] = useUrlBackedParam('requisitions', 'q', '')
   const [detail, setDetail] = useState<{
     requisition?: ReqRow
     events?: Array<{ event_type?: string; created_at?: string }>
@@ -134,12 +137,13 @@ export function RequisitionsWorkspace({
   const canApprove = permissions.includes('requisitions.approve')
 
   const loadQueue = useCallback(async () => {
-    setLoading(true)
+    if (!paintedRef.current) setLoading(true)
     try {
       const res = await getPrehireRequisitions(access, { status: filter || undefined, limit: 100 })
       setRows((res.requisitions || []) as ReqRow[])
       setCounts((res.counts || {}) as Record<string, number>)
       setModuleDenied(false)
+      paintedRef.current = true
       if (!selectedId && res.requisitions?.[0]?.requisition_id) {
         setSelectedId(String(res.requisitions[0].requisition_id))
       }
@@ -154,7 +158,7 @@ export function RequisitionsWorkspace({
     } finally {
       setLoading(false)
     }
-  }, [access, filter, isAr, onAccessIssue, onNotice, selectedId])
+  }, [access, filter, isAr, onAccessIssue, onNotice, selectedId, setSelectedId])
 
   const loadDetail = useCallback(
     async (id: string) => {
@@ -210,23 +214,18 @@ export function RequisitionsWorkspace({
   const selected = detail?.requisition
 
   return (
-    <div className="flex h-full min-h-[70vh] flex-col gap-4 p-4 md:p-6" dir={isAr ? 'rtl' : 'ltr'}>
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-            <BriefcaseBusiness className="h-6 w-6" />
-            {c.title}
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{c.subtitle}</p>
-        </div>
-        <Button variant="outline" size="sm" onClick={() => void loadQueue()}>
+    <div className="flex h-full min-h-[70vh] flex-col gap-4" dir={isAr ? 'rtl' : 'ltr'}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-2xl text-sm text-semantic-subtle">{c.subtitle}</p>
+        <Button variant="ghost" size="sm" onClick={() => void loadQueue()}>
           <RefreshCw className="me-2 h-4 w-4" />
           {c.refresh}
         </Button>
-      </header>
+      </div>
 
-      <div className="flex flex-wrap gap-2">
-        {(
+      <HrSurfaceTabs
+        ariaLabel={isAr ? 'طلبات التوظيف' : 'Requisitions'}
+        items={(
           [
             ['attention', c.attention, counts.attention],
             ['draft', c.draft, counts.draft],
@@ -235,21 +234,15 @@ export function RequisitionsWorkspace({
             ['open', c.open, counts.open],
             ['filled', c.filled, counts.filled],
           ] as const
-        ).map(([key, label, count]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => setFilter(key)}
-            className={cn(
-              'rounded-full border px-3 py-1 text-sm',
-              filter === key ? 'border-foreground bg-foreground text-background' : 'border-border',
-            )}
-          >
-            {label}
-            {typeof count === 'number' ? ` · ${count}` : ''}
-          </button>
-        ))}
-      </div>
+        ).map(([id, label, count]) => ({
+          id,
+          label,
+          count: typeof count === 'number' ? count : undefined,
+        }))}
+        onChange={(id) => setFilter(id as ReqTab)}
+        testId="requisition-status-tabs"
+        value={filter}
+      />
 
       {canManage ? (
         <div className="grid gap-2 rounded-lg border border-border/60 p-3 md:grid-cols-4">
@@ -310,7 +303,7 @@ export function RequisitionsWorkspace({
 
       <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(280px,1fr)_minmax(360px,1.2fr)]">
         <section className="overflow-auto rounded-xl border border-border/70">
-          {loading ? (
+          {loading && rows.length === 0 ? (
             <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
               <Loader2 className="h-4 w-4 animate-spin" /> …
             </div>

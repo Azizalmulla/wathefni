@@ -17,7 +17,7 @@ import {
   type CandidateListPerson,
 } from '@/lib/candidatesListPresentation'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 
 export { isHeldCandidate, isGeneralCandidate }
 export type { CandidateListPerson }
@@ -105,19 +105,16 @@ export function CandidateViewPills({
 }) {
   const pills = CANDIDATE_VIEW_PILLS.filter((pill) => pill.id !== 'restricted' || showRestricted)
   return (
-    <div className="flex flex-wrap gap-2" data-testid="candidate-view-pills">
-      {pills.map((pill) => (
-        <Button
-          key={pill.id}
-          onClick={() => onChange(pill.id)}
-          size="sm"
-          type="button"
-          variant={value === pill.id ? 'default' : 'secondary'}
-        >
-          {locale === 'ar' ? pill.labelAr : pill.labelEn}
-        </Button>
-      ))}
-    </div>
+    <HrSurfaceTabs
+      ariaLabel={locale === 'ar' ? 'عرض المرشحين' : 'Candidate views'}
+      items={pills.map((pill) => ({
+        id: pill.id,
+        label: locale === 'ar' ? pill.labelAr : pill.labelEn,
+      }))}
+      onChange={onChange}
+      testId="candidate-view-pills"
+      value={value}
+    />
   )
 }
 
@@ -125,7 +122,7 @@ function CandidateAvatar({ name }: { name: string }) {
   return (
     <span
       aria-hidden="true"
-      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#eee5d4] text-[11px] font-semibold tracking-wide text-[#23211d]"
+      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-semantic-accent-soft text-[11px] font-semibold tracking-wide text-semantic-ink"
     >
       {candidateInitials(name)}
     </span>
@@ -153,7 +150,7 @@ export const CandidateTableRow = memo(function CandidateTableRow({
 
   return (
     <tr
-      className="cursor-pointer transition duration-150 hover:bg-[#f8f3e9]/90"
+      className="cursor-pointer transition duration-150 hover:bg-semantic-surface-raised/90"
       data-record-state={primary.record_state || (isGeneralCandidate(primary) ? 'talent_pool' : 'active_application')}
       data-testid="candidate-list-row"
       onClick={() => onSelect(primary)}
@@ -164,7 +161,7 @@ export const CandidateTableRow = memo(function CandidateTableRow({
           <div className="min-w-0">
             <div className="truncate font-semibold text-text">{name}</div>
             {row.identityReviewWarning ? (
-              <div className="mt-1 flex items-center gap-1.5 text-xs font-medium text-[#8a5a12]" data-testid="identity-review-warning">
+              <div className="mt-1 flex items-center gap-1.5 text-xs font-medium text-semantic-warning-ink" data-testid="identity-review-warning">
                 <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full bg-wf-accent-review" />
                 {identityReviewWarningLabel(locale)}
               </div>

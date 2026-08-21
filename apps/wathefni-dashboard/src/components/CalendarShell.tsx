@@ -43,6 +43,7 @@ import {
 import { invalidate } from '@/lib/query/invalidation'
 import { qk } from '@/lib/query/keys'
 import { fetchCalendarEvents } from '@/lib/query/fetchers'
+import { useUrlBackedParam, useUrlBackedTab } from '@/lib/hrWebUrlTab'
 import type { DashboardAccess } from '@/types'
 
 type Scope = 'mine' | 'team' | 'company'
@@ -86,6 +87,17 @@ export const CALENDAR_MIN_EVENT_HEIGHT_PX = 40
 
 function pad(n: number) {
   return String(n).padStart(2, '0')
+}
+
+function calendarDateKey(d: Date) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+function parseCalendarDate(raw: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(raw || '').trim())
+  if (!match) return null
+  const parsed = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+  return Number.isFinite(parsed.getTime()) ? startOfDay(parsed) : null
 }
 
 function startOfDay(d: Date) {
@@ -830,10 +842,30 @@ export function CalendarShell({
   const [isMobile, setIsMobile] = useState(() =>
     typeof window !== 'undefined' ? window.matchMedia('(max-width: 900px)').matches : false,
   )
-  const [view, setView] = useState<ViewMode>(() =>
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches ? 'day' : 'week',
+  const defaultView: ViewMode =
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches ? 'day' : 'week'
+  const [view, setViewUrl] = useUrlBackedTab('calendar', ['day', 'week', 'month'] as const, defaultView)
+  const setView = useCallback(
+    (next: ViewMode | ((current: ViewMode) => ViewMode)) => {
+      const resolved = typeof next === 'function' ? next(view) : next
+      if (resolved !== view) setViewUrl(resolved)
+    },
+    [setViewUrl, view],
   )
-  const [anchor, setAnchor] = useState(() => startOfDay(new Date()))
+  const [dateParam, setDateParam] = useUrlBackedParam(
+    'calendar',
+    'date',
+    calendarDateKey(startOfDay(new Date())),
+    'replace',
+  )
+  const anchor = parseCalendarDate(dateParam) || startOfDay(new Date())
+  const setAnchor = useCallback(
+    (next: Date | ((current: Date) => Date)) => {
+      const resolved = typeof next === 'function' ? next(anchor) : next
+      setDateParam(calendarDateKey(startOfDay(resolved)), 'replace')
+    },
+    [anchor, setDateParam],
+  )
   const [orgScopeId, setOrgScopeId] = useState<string>('')
   const [typeFilter, setTypeFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')

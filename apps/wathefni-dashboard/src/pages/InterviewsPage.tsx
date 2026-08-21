@@ -23,6 +23,7 @@ import {
   type RecruitingLocale,
 } from '@/lib/recruitingLifecycle'
 import { cn, formatDateTime, statusTone } from '@/lib/utils'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { PeoplePicker } from '@/components/PeoplePicker'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -51,7 +52,7 @@ import type { CandidateInterview, DashboardAccess } from '@/types'
 
 function QuietInfo({ label, value, locale }: { label: string; value?: string | null; locale: RecruitingLocale }) {
   return (
-    <div className="rounded-2xl border border-[#e8dfd0] bg-[#fffaf0]/70 p-3.5">
+    <div className="rounded-2xl border border-semantic-line bg-semantic-surface/70 p-3.5">
       <div
         className={cn(
           'font-semibold text-subtle',
@@ -206,8 +207,8 @@ export function InterviewsPage({
   const canGoNext = offset + limit < total
   const headerLabelClass =
     locale === 'ar'
-      ? 'text-[12px] font-semibold text-[#6f675c]'
-      : 'text-[11px] font-semibold uppercase tracking-[0.12em] text-[#6f675c]'
+      ? 'text-[12px] font-semibold text-semantic-subtle'
+      : 'text-[11px] font-semibold uppercase tracking-[0.12em] text-semantic-subtle'
 
   function selectTab(tabId: string) {
     onUpdateFilters({ tab: tabId })
@@ -261,29 +262,20 @@ export function InterviewsPage({
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            {primaryTabs.map((tab) => (
-              <button
-                className={cn(
-                  'rounded-full px-3.5 py-1.5 text-sm transition',
-                  filters.tab === tab.id
-                    ? 'bg-[#23211d] font-semibold text-white'
-                    : 'text-[#6f675c] hover:bg-white/70 hover:text-[#23211d]',
-                )}
-                key={tab.id}
-                onClick={() => selectTab(tab.id)}
-                type="button"
-              >
-                {tab.label} <span className="ms-1 opacity-70">{tab.count}</span>
-              </button>
-            ))}
+          <HrSurfaceTabs
+            ariaLabel={recruitingCopy(locale, 'interviewQueue')}
+            items={primaryTabs.map((tab) => ({ id: tab.id, label: tab.label, count: tab.count }))}
+            onChange={selectTab}
+            testId="interview-primary-tabs"
+            value={filters.tab}
+            trailing={
             <details className="relative">
               <summary
                 className={cn(
                   'flex cursor-pointer list-none items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm transition marker:content-none [&::-webkit-details-marker]:hidden',
                   selectedSecondary
-                    ? 'bg-[#23211d] font-semibold text-white'
-                    : 'border border-[#e8dfd0] bg-white/55 text-[#6f675c] hover:border-[#23211d]/25 hover:text-[#23211d]',
+                    ? 'bg-semantic-ink font-semibold text-white'
+                    : 'border border-semantic-line bg-white/55 text-semantic-subtle hover:border-semantic-ink/25 hover:text-semantic-ink',
                 )}
               >
                 {selectedSecondary
@@ -291,12 +283,12 @@ export function InterviewsPage({
                   : recruitingCopy(locale, 'interviewMore')}
                 <ChevronDown size={14} />
               </summary>
-              <div className="absolute z-20 mt-2 min-w-[11rem] rounded-2xl border border-[#e8dfd0] bg-[#fffaf0] p-1.5 shadow-[0_16px_40px_rgba(35,33,29,0.12)]">
+              <div className="absolute z-20 mt-2 min-w-[11rem] rounded-2xl border border-semantic-line bg-semantic-surface p-1.5 shadow-[0_16px_40px_rgba(35,33,29,0.12)]">
                 {secondaryTabs.map((tab) => (
                   <button
                     className={cn(
                       'flex w-full items-center justify-between rounded-xl px-3 py-2 text-sm transition',
-                      filters.tab === tab.id ? 'bg-[#23211d] text-white' : 'text-[#23211d] hover:bg-white/80',
+                      filters.tab === tab.id ? 'bg-semantic-ink text-white' : 'text-semantic-ink hover:bg-white/80',
                     )}
                     key={tab.id}
                     onClick={(event) => {
@@ -312,7 +304,8 @@ export function InterviewsPage({
                 ))}
               </div>
             </details>
-          </div>
+            }
+          />
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
             <Input
@@ -327,15 +320,15 @@ export function InterviewsPage({
                 className={cn(
                   'flex cursor-pointer list-none items-center gap-2 rounded-full border px-3.5 py-2 text-sm marker:content-none [&::-webkit-details-marker]:hidden',
                   filtersActive
-                    ? 'border-[#23211d] bg-[#23211d] font-semibold text-white'
-                    : 'border-[#e8dfd0] bg-white/55 text-[#6f675c] hover:border-[#23211d]/25 hover:text-[#23211d]',
+                    ? 'border-semantic-ink bg-semantic-ink font-semibold text-white'
+                    : 'border-semantic-line bg-white/55 text-semantic-subtle hover:border-semantic-ink/25 hover:text-semantic-ink',
                 )}
               >
                 <SlidersHorizontal size={14} />
                 {recruitingCopy(locale, 'interviewFilters')}
                 {filtersActive ? <span className="opacity-80">·</span> : null}
               </summary>
-              <div className="absolute end-0 z-20 mt-2 w-[min(100vw-2rem,20rem)] space-y-2 rounded-2xl border border-[#e8dfd0] bg-[#fffaf0] p-3 shadow-[0_16px_40px_rgba(35,33,29,0.12)]">
+              <div className="absolute end-0 z-20 mt-2 w-[min(100vw-2rem,20rem)] space-y-2 rounded-2xl border border-semantic-line bg-semantic-surface p-3 shadow-[0_16px_40px_rgba(35,33,29,0.12)]">
                 <Input
                   onChange={(event) => onUpdateFilters({ role: event.target.value })}
                   placeholder={recruitingCopy(locale, 'interviewRolePlaceholder')}
@@ -384,11 +377,11 @@ export function InterviewsPage({
               testId="interviews-list-error"
             />
           ) : interviews.length ? (
-            <div className="overflow-x-auto rounded-[1.35rem] border border-[#e8dfd0] bg-[#f8f2e6]/65">
+            <div className="overflow-x-auto rounded-[1.35rem] border border-semantic-line bg-semantic-surface-raised/65">
               <div className="min-w-[1160px]">
                 <div
                   className={cn(
-                    'grid grid-cols-[minmax(200px,1.4fr)_minmax(150px,1fr)_minmax(170px,1.1fr)_minmax(130px,0.9fr)_minmax(130px,0.9fr)_minmax(150px,1fr)] items-center gap-3 border-b border-[#e8dfd0] bg-[#f7f1e7]/90 px-4 py-2.5',
+                    'grid grid-cols-[minmax(200px,1.4fr)_minmax(150px,1fr)_minmax(170px,1.1fr)_minmax(130px,0.9fr)_minmax(130px,0.9fr)_minmax(150px,1fr)] items-center gap-3 border-b border-semantic-line bg-semantic-accent-soft/90 px-4 py-2.5',
                     headerLabelClass,
                   )}
                 >
@@ -420,7 +413,7 @@ export function InterviewsPage({
               testId="interviews-list-empty"
             />
           )}
-          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-[#6f675c]">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-semantic-subtle">
             <div>
               {recruitingCopy(locale, 'interviewShowing', {
                 from: total ? offset + 1 : 0,
@@ -497,21 +490,21 @@ export const InterviewQueueRow = memo(function InterviewQueueRow({
   return (
     <div
       className={cn(
-        'grid h-14 cursor-pointer grid-cols-[minmax(200px,1.4fr)_minmax(150px,1fr)_minmax(170px,1.1fr)_minmax(130px,0.9fr)_minmax(130px,0.9fr)_minmax(150px,1fr)] items-center gap-3 border-b border-[#e8dfd0]/80 px-4 text-sm transition hover:bg-white/55 last:border-b-0',
+        'grid h-14 cursor-pointer grid-cols-[minmax(200px,1.4fr)_minmax(150px,1fr)_minmax(170px,1.1fr)_minmax(130px,0.9fr)_minmax(130px,0.9fr)_minmax(150px,1fr)] items-center gap-3 border-b border-semantic-line/80 px-4 text-sm transition hover:bg-white/55 last:border-b-0',
         muted && 'opacity-75',
       )}
       onClick={onOpen}
     >
       <div className="min-w-0">
-        <div className="truncate font-semibold text-[#23211d]">{interview.candidate_name || interview.phone || 'Candidate'}</div>
-        <div className="truncate text-xs text-[#6f675c]">{interview.candidate_email || interview.phone || ''}</div>
+        <div className="truncate font-semibold text-semantic-ink">{interview.candidate_name || interview.phone || 'Candidate'}</div>
+        <div className="truncate text-xs text-semantic-subtle">{interview.candidate_email || interview.phone || ''}</div>
       </div>
-      <div className="truncate text-[#6f675c]">{interview.position_title || interview.position_code || 'Role'}</div>
+      <div className="truncate text-semantic-subtle">{interview.position_title || interview.position_code || 'Role'}</div>
       <div className="min-w-0">
-        <div className="truncate text-sm font-medium text-[#23211d]">{typeLabel}</div>
-        <div className="truncate text-xs text-[#6f675c]">{dateTime ? `${progressLabel} · ${dateTime}` : progressLabel}</div>
+        <div className="truncate text-sm font-medium text-semantic-ink">{typeLabel}</div>
+        <div className="truncate text-xs text-semantic-subtle">{dateTime ? `${progressLabel} · ${dateTime}` : progressLabel}</div>
       </div>
-      <div className="truncate text-[#6f675c]">{interviewerLabel}</div>
+      <div className="truncate text-semantic-subtle">{interviewerLabel}</div>
       <div>
         <Badge tone={feedbackComplete ? 'success' : 'warning'}>{feedbackLabel}</Badge>
       </div>
@@ -641,10 +634,10 @@ export function InterviewActions({
       ) : null}
       {actions.has('mark_no_show') || actions.has('cancel_interview') ? (
         <details className="relative">
-          <summary className="cursor-pointer rounded-full border border-[#e8dfd0] bg-white/55 px-3 py-1.5 text-sm text-[#6f675c] transition hover:border-[#23211d]/25 hover:text-[#23211d]">
+          <summary className="cursor-pointer rounded-full border border-semantic-line bg-white/55 px-3 py-1.5 text-sm text-semantic-subtle transition hover:border-semantic-ink/25 hover:text-semantic-ink">
             {recruitingCopy(locale, 'interviewMore')}
           </summary>
-          <div className="absolute end-0 z-10 mt-2 grid w-44 gap-2 rounded-xl border border-[#e8dfd0] bg-[#fffaf0] p-2 shadow-soft">
+          <div className="absolute end-0 z-10 mt-2 grid w-44 gap-2 rounded-xl border border-semantic-line bg-semantic-surface p-2 shadow-soft">
             {actions.has('mark_no_show') ? (
               <Button disabled={busy || submitting} onClick={() => openDialog('no_show')} size="sm" variant="ghost">
                 {recruitingActionLabel('mark_no_show', locale)}
@@ -902,29 +895,29 @@ export function InterviewDetailDrawer({
   const notRecorded = recruitingCopy(locale, 'interviewNotRecorded')
 
   return (
-    <div className="fixed inset-0 z-30 overflow-hidden bg-[#23211d]/35" dir={locale === 'ar' ? 'rtl' : 'ltr'} onClick={onClose}>
+    <div className="fixed inset-0 z-30 overflow-hidden bg-semantic-ink/35" dir={locale === 'ar' ? 'rtl' : 'ltr'} onClick={onClose}>
       <aside
-        className="ms-auto flex h-full w-full max-w-3xl flex-col overflow-y-auto overscroll-contain border-s border-[#e8dfd0] bg-[#fffaf0] p-5 shadow-[0_24px_80px_rgba(35,33,29,0.18)] sm:p-6"
+        className="ms-auto flex h-full w-full max-w-3xl flex-col overflow-y-auto overscroll-contain border-s border-semantic-line bg-semantic-surface p-5 shadow-[0_24px_80px_rgba(35,33,29,0.18)] sm:p-6"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex flex-col gap-4 border-b border-[#e8dfd0] pb-5 xl:flex-row xl:items-start xl:justify-between">
+        <div className="flex flex-col gap-4 border-b border-semantic-line pb-5 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-xl font-semibold tracking-tight text-[#23211d]">
+              <h3 className="text-xl font-semibold tracking-tight text-semantic-ink">
                 {interview.candidate_name || interview.phone || 'Candidate'}
               </h3>
               <Badge tone={isVideo ? videoStatus.tone : statusTone(interview.status)}>
                 {mainStatus}
               </Badge>
             </div>
-            <div className="mt-1.5 text-sm text-[#6f675c]">
+            <div className="mt-1.5 text-sm text-semantic-subtle">
               {[
                 roleLabel,
                 typeLabel,
                 presentation?.display?.show_datetime ? scheduleLabel : null,
               ].filter(Boolean).join(' · ')}
             </div>
-            <div className="mt-1 text-xs text-[#8a8276]">
+            <div className="mt-1 text-xs text-semantic-mist">
               {recruitingCopy(locale, 'applicationStage')}: {canonicalStageLabel(interview.application_stage, locale)}
             </div>
           </div>
@@ -945,7 +938,7 @@ export function InterviewDetailDrawer({
           </div>
         </div>
 
-        <p className="mt-4 text-[15px] leading-7 text-[#4a453c]">{summaryLine}</p>
+        <p className="mt-4 text-[15px] leading-7 text-semantic-ink-muted">{summaryLine}</p>
 
         <div className="mt-4 space-y-4">
           {failedInvite ? (
@@ -975,13 +968,13 @@ export function InterviewDetailDrawer({
             </Button>
           </div>
           {!interview.allowed_actions?.length ? (
-            <div className="text-xs text-[#6f675c]">{recruitingCopy(locale, 'noPermittedActions')}</div>
+            <div className="text-xs text-semantic-subtle">{recruitingCopy(locale, 'noPermittedActions')}</div>
           ) : null}
         </div>
 
         <div className="mt-5 space-y-2">
-          <details className="rounded-2xl border border-[#e8dfd0] bg-[#f8f2e6]/70 p-4">
-            <summary className="cursor-pointer text-sm font-semibold text-[#23211d]">{recruitingCopy(locale, 'interviewInviteDetails')}</summary>
+          <details className="rounded-2xl border border-semantic-line bg-semantic-surface-raised/70 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-semantic-ink">{recruitingCopy(locale, 'interviewInviteDetails')}</summary>
             <div className="mt-3 grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-3">
               <QuietInfo label={recruitingCopy(locale, 'interviewInvite')} locale={locale} value={inviteTruthLabel(interview)} />
               <QuietInfo label={recruitingCopy(locale, 'invitationStatus')} locale={locale} value={communicationLabel(interview.invitation_status, locale)} />
@@ -997,22 +990,22 @@ export function InterviewDetailDrawer({
             </div>
           </details>
           {interview.sent_subject || interview.sent_body ? (
-            <details className="rounded-2xl border border-[#e8dfd0] bg-[#f8f2e6]/70 p-4">
-              <summary className="cursor-pointer text-sm font-semibold text-[#23211d]">{recruitingCopy(locale, 'interviewSentMessage')}</summary>
-              {interview.sent_subject ? <div className="mt-3 text-sm font-medium text-[#23211d]">{interview.sent_subject}</div> : null}
-              {interview.sent_body ? <div className="mt-2 whitespace-pre-wrap text-sm leading-6 text-[#6f675c]">{interview.sent_body}</div> : null}
+            <details className="rounded-2xl border border-semantic-line bg-semantic-surface-raised/70 p-4">
+              <summary className="cursor-pointer text-sm font-semibold text-semantic-ink">{recruitingCopy(locale, 'interviewSentMessage')}</summary>
+              {interview.sent_subject ? <div className="mt-3 text-sm font-medium text-semantic-ink">{interview.sent_subject}</div> : null}
+              {interview.sent_body ? <div className="mt-2 whitespace-pre-wrap text-sm leading-6 text-semantic-subtle">{interview.sent_body}</div> : null}
             </details>
           ) : null}
-          <details className="rounded-2xl border border-[#e8dfd0] bg-[#f8f2e6]/70 p-4">
-            <summary className="cursor-pointer text-sm font-semibold text-[#23211d]">{recruitingCopy(locale, 'interviewTimeline')}</summary>
+          <details className="rounded-2xl border border-semantic-line bg-semantic-surface-raised/70 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-semantic-ink">{recruitingCopy(locale, 'interviewTimeline')}</summary>
             <div className="mt-3 grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-3">
               <QuietInfo label={isVideo ? recruitingCopy(locale, 'interviewLatestActivity') : recruitingCopy(locale, 'interviewScheduledTime')} locale={locale} value={scheduleLabel} />
               <QuietInfo label={recruitingCopy(locale, 'interviewCreated')} locale={locale} value={interview.created_at ? formatDateTime(interview.created_at) : notRecorded} />
               <QuietInfo label={recruitingCopy(locale, 'interviewUpdated')} locale={locale} value={interview.updated_at ? formatDateTime(interview.updated_at) : notRecorded} />
             </div>
           </details>
-          <details className="rounded-2xl border border-[#e8dfd0] bg-[#f8f2e6]/70 p-4">
-            <summary className="cursor-pointer text-sm font-semibold text-[#23211d]">{recruitingCopy(locale, 'interviewStatusDetails')}</summary>
+          <details className="rounded-2xl border border-semantic-line bg-semantic-surface-raised/70 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-semantic-ink">{recruitingCopy(locale, 'interviewStatusDetails')}</summary>
             <div className="mt-3 grid gap-3 text-sm md:grid-cols-2 xl:grid-cols-3">
               <QuietInfo label={recruitingCopy(locale, 'interviewState')} locale={locale} value={isVideo ? mainStatus : stageLabel(interview.status)} />
               <QuietInfo label={recruitingCopy(locale, 'applicationStage')} locale={locale} value={canonicalStageLabel(interview.application_stage, locale)} />
@@ -1020,7 +1013,7 @@ export function InterviewDetailDrawer({
               <QuietInfo label={recruitingCopy(locale, 'notesStatus')} locale={locale} value={stageLabel(interview.notes_status || notesStateLabel(interview))} />
             </div>
             {interview.notes ? (
-              <div className="mt-3 text-sm leading-6 text-[#6f675c]">
+              <div className="mt-3 text-sm leading-6 text-semantic-subtle">
                 {recruitingCopy(locale, 'interviewLatestHrNotes')}: {interview.notes}
               </div>
             ) : null}
@@ -1041,11 +1034,11 @@ export function PracticalInterviewSummary({ interview, locale }: { interview: Ca
   const overallFit = normalizeOverallImpression(summaryValue(summary, ['overall_fit', 'fit', 'fit_label'])) || recruitingCopy(locale, 'interviewNeedsMoreEvidence')
   const confidence = normalizeEvidenceConfidence(summaryValue(summary, ['confidence', 'confidence_label'])) || recruitingCopy(locale, 'interviewConfidenceLimited')
   return (
-    <div className="rounded-2xl border border-[#e8dfd0] bg-[#f8f2e6]/70 p-4">
+    <div className="rounded-2xl border border-semantic-line bg-semantic-surface-raised/70 p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="text-sm font-semibold text-[#23211d]">{recruitingCopy(locale, 'analysis')}</div>
-          <p className="mt-2 text-sm leading-6 text-[#6f675c]">{overallSummary}</p>
+          <div className="text-sm font-semibold text-semantic-ink">{recruitingCopy(locale, 'analysis')}</div>
+          <p className="mt-2 text-sm leading-6 text-semantic-subtle">{overallSummary}</p>
         </div>
         <div className="grid min-w-[220px] gap-2 text-sm sm:grid-cols-2 md:grid-cols-1">
           <QuietInfo label={recruitingCopy(locale, 'interviewOverallImpression')} locale={locale} value={overallFit} />
@@ -1058,22 +1051,22 @@ export function PracticalInterviewSummary({ interview, locale }: { interview: Ca
         <InterviewSummaryList label={recruitingCopy(locale, 'recommendation')} values={[recommended]} />
       </div>
       {followUps.length ? (
-        <div className="mt-4 rounded-xl border border-[#e8dfd0] bg-[#fffaf0] p-3">
-          <div className="text-sm font-semibold text-[#23211d]">{recruitingCopy(locale, 'interviewFollowUpQuestions')}</div>
-          <ol className="mt-2 list-decimal space-y-1 ps-5 text-sm leading-6 text-[#6f675c]">
+        <div className="mt-4 rounded-xl border border-semantic-line bg-semantic-surface p-3">
+          <div className="text-sm font-semibold text-semantic-ink">{recruitingCopy(locale, 'interviewFollowUpQuestions')}</div>
+          <ol className="mt-2 list-decimal space-y-1 ps-5 text-sm leading-6 text-semantic-subtle">
             {followUps.map((item, index) => <li key={`${item}-${index}`}>{item}</li>)}
           </ol>
         </div>
       ) : null}
-      <details className="mt-4 rounded-xl border border-[#e8dfd0] bg-[#fffaf0] p-3">
-        <summary className="cursor-pointer text-sm font-semibold text-[#23211d]">{recruitingCopy(locale, 'interviewDetailedEvidence')}</summary>
+      <details className="mt-4 rounded-xl border border-semantic-line bg-semantic-surface p-3">
+        <summary className="cursor-pointer text-sm font-semibold text-semantic-ink">{recruitingCopy(locale, 'interviewDetailedEvidence')}</summary>
         <div className="mt-3 grid gap-3 text-sm md:grid-cols-2">
           <InterviewSummaryList label={recruitingCopy(locale, 'interviewRoleFitEvidence')} values={summary?.role_fit_evidence || []} />
           <InterviewSummaryList label={recruitingCopy(locale, 'interviewCommunicationNotes')} values={summary?.communication_notes || []} />
           <InterviewSummaryList label={recruitingCopy(locale, 'missingInformation')} values={summary?.missing_evidence || []} />
         </div>
       </details>
-      <div className="mt-3 text-xs leading-5 text-[#8a8276]">{summary?.hr_decision_maker_note || summary?.decision_policy || recruitingCopy(locale, 'advisory')}</div>
+      <div className="mt-3 text-xs leading-5 text-semantic-mist">{summary?.hr_decision_maker_note || summary?.decision_policy || recruitingCopy(locale, 'advisory')}</div>
     </div>
   )
 }
@@ -1097,16 +1090,16 @@ export function VideoInterviewReview({
   const questions = interview.video_questions || answers[0]?.covered_questions || []
   const singleVideo = interview.response_mode === 'single_video' || answers.some((answer) => answer.response_mode === 'single_video')
   const failed = answers.some((answer) => answer.transcript_status === 'failed')
-  const labelClass = locale === 'ar' ? 'text-xs font-semibold text-[#8a8276]' : 'text-xs font-semibold uppercase tracking-[0.08em] text-[#8a8276]'
+  const labelClass = locale === 'ar' ? 'text-xs font-semibold text-semantic-mist' : 'text-xs font-semibold uppercase tracking-[0.08em] text-semantic-mist'
   return (
-    <div className="rounded-2xl border border-[#e8dfd0] bg-[#f8f2e6]/70 p-4">
+    <div className="rounded-2xl border border-semantic-line bg-semantic-surface-raised/70 p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <div className="text-sm font-semibold text-[#23211d]">{recruitingCopy(locale, 'interviewVideoEvidence')}</div>
+            <div className="text-sm font-semibold text-semantic-ink">{recruitingCopy(locale, 'interviewVideoEvidence')}</div>
             <Badge tone={asyncVideoDisplayStatus(interview).tone}>{asyncVideoDisplayStatus(interview).label}</Badge>
           </div>
-          <div className="mt-1 text-sm leading-6 text-[#6f675c]">{videoInterviewProcessingLine(interview)}</div>
+          <div className="mt-1 text-sm leading-6 text-semantic-subtle">{videoInterviewProcessingLine(interview)}</div>
         </div>
         {failed ? (
           <Button disabled={busy || !canManageInterviews} onClick={() => onRetryVideoTranscripts(interview)} size="sm" variant="secondary">
@@ -1115,10 +1108,10 @@ export function VideoInterviewReview({
         ) : null}
       </div>
       {singleVideo && questions.length && answers.length ? (
-        <div className="mt-4 rounded-xl border border-[#e8dfd0] bg-[#fffaf0] p-3">
+        <div className="mt-4 rounded-xl border border-semantic-line bg-semantic-surface p-3">
           <div className={labelClass}>{recruitingCopy(locale, 'interviewQuestionList')}</div>
-          <div className="mt-1 text-sm font-medium text-[#23211d]">{recruitingCopy(locale, 'interviewAnsweredFullList')}</div>
-          <ol className="mt-2 list-decimal space-y-2 ps-5 text-sm leading-6 text-[#6f675c]">
+          <div className="mt-1 text-sm font-medium text-semantic-ink">{recruitingCopy(locale, 'interviewAnsweredFullList')}</div>
+          <ol className="mt-2 list-decimal space-y-2 ps-5 text-sm leading-6 text-semantic-subtle">
             {questions.map((question, index) => (
               <li key={question.question_id || index}>{question.prompt_text || recruitingCopy(locale, 'interviewVideoEvidence')}</li>
             ))}
@@ -1128,7 +1121,7 @@ export function VideoInterviewReview({
       <div className="mt-4 space-y-3">
         {answers.length ? (
           answers.map((answer) => (
-            <div className="rounded-xl border border-[#e8dfd0] bg-[#fffaf0] p-3" key={answer.response_id}>
+            <div className="rounded-xl border border-semantic-line bg-semantic-surface p-3" key={answer.response_id}>
               <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                 <div>
                   <div className={labelClass}>
@@ -1136,10 +1129,10 @@ export function VideoInterviewReview({
                       ? recruitingCopy(locale, 'interviewVideoAnswer')
                       : recruitingCopy(locale, 'interviewQuestionN', { n: answer.question_order || '' })}
                   </div>
-                  <div className="mt-1 text-sm font-medium text-[#23211d]">
+                  <div className="mt-1 text-sm font-medium text-semantic-ink">
                     {singleVideo ? recruitingCopy(locale, 'interviewAnsweredFullList') : answer.question_text || recruitingCopy(locale, 'interviewVideoEvidence')}
                   </div>
-                  <div className="mt-1 text-xs text-[#8a8276]">
+                  <div className="mt-1 text-xs text-semantic-mist">
                     {recruitingCopy(locale, 'interviewTranscript')}: {transcriptStatusLabel(answer.transcript_status)}
                   </div>
                 </div>
@@ -1150,7 +1143,7 @@ export function VideoInterviewReview({
                 ) : null}
               </div>
               {answer.transcript_status === 'completed' && answer.transcript_text ? (
-                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#6f675c]">{answer.transcript_text}</p>
+                <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-semantic-subtle">{answer.transcript_text}</p>
               ) : null}
               {answer.transcript_status === 'failed' ? (
                 <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
@@ -1170,13 +1163,13 @@ export function VideoInterviewReview({
 export function InterviewSummaryList({ label, values }: { label: string; values: string[] }) {
   return (
     <div>
-      <div className="font-medium text-[#23211d]">{label}</div>
+      <div className="font-medium text-semantic-ink">{label}</div>
       {values.length ? (
-        <ul className="mt-1 list-disc space-y-1 ps-4 text-[#6f675c]">
+        <ul className="mt-1 list-disc space-y-1 ps-4 text-semantic-subtle">
           {values.slice(0, 4).map((value, index) => <li key={`${value}-${index}`}>{value}</li>)}
         </ul>
       ) : (
-        <div className="mt-1 text-[#8a8276]">—</div>
+        <div className="mt-1 text-semantic-mist">—</div>
       )}
     </div>
   )

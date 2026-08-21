@@ -217,8 +217,27 @@ function isEnterpriseFlagshipPage(page: Page | string): boolean {
   )
 }
 
+function isRecruitingPrehirePage(page: Page | string): boolean {
+  return (
+    page === 'jobs' ||
+    page === 'requisitions' ||
+    page === 'candidates' ||
+    page === 'interviews' ||
+    page === 'calendar' ||
+    page === 'assessments' ||
+    page === 'ranking' ||
+    page === 'reports' ||
+    page === 'ai'
+  )
+}
+
 function usesCanonicalPageHeader(page: Page | string): boolean {
-  return isOperationalCorePage(page) || isPeopleSpinePage(page) || isEnterpriseFlagshipPage(page)
+  return (
+    isOperationalCorePage(page) ||
+    isPeopleSpinePage(page) ||
+    isEnterpriseFlagshipPage(page) ||
+    isRecruitingPrehirePage(page)
+  )
 }
 
 // Lifecycle confirmation contract (kept in lockstep with HR mobile and lifecycle-labels tests).
@@ -801,6 +820,7 @@ function App() {
               ...(interviewRole ? { role: interviewRole } : {}),
               ...(interviewDate ? { date: interviewDate } : {}),
               ...(interviewInterviewer ? { interviewer: interviewInterviewer } : {}),
+              ...(interviewQuery.trim() ? { q: interviewQuery.trim() } : {}),
             }
           : nextPage === 'ranking'
             ? {
@@ -825,7 +845,12 @@ function App() {
                       : (assessmentTabForCohort(assessmentCohort) || assessmentTab || 'send'),
                   }
                 })()
-              : {}
+              : nextPage === 'jobs'
+                ? {
+                    ...(jobsStatusFilter ? { status: jobsStatusFilter } : {}),
+                    ...(jobsQuery.trim() ? { q: jobsQuery.trim() } : {}),
+                  }
+                : {}
     writeDashboardNavUrl(
       {
         page: nextPage,
@@ -855,7 +880,12 @@ function App() {
       setInterviewRole(nav.filters.role || '')
       setInterviewDate(nav.filters.date || '')
       setInterviewInterviewer(nav.filters.interviewer || '')
+      setInterviewQuery(nav.filters.q || '')
       setInterviewOffset(0)
+    }
+    if (nextPage === 'jobs') {
+      setJobsStatusFilter(nav.filters.status || '')
+      if (typeof nav.filters.q === 'string') setJobsQuery(nav.filters.q)
     }
     if (nextPage === 'ranking' && nav.filters.position_code) {
       setRankPosition(nav.filters.position_code)
@@ -1299,6 +1329,20 @@ function App() {
       )
       return
     }
+    if (page === 'jobs') {
+      writeDashboardNavUrl(
+        {
+          page: 'jobs',
+          candidate: null,
+          filters: {
+            ...(jobsStatusFilter ? { status: jobsStatusFilter } : {}),
+            ...(jobsQuery.trim() ? { q: jobsQuery.trim() } : {}),
+          },
+        },
+        'replace',
+      )
+      return
+    }
     if (page === 'interviews') {
       writeDashboardNavUrl(
         {
@@ -1309,6 +1353,7 @@ function App() {
             ...(interviewRole ? { role: interviewRole } : {}),
             ...(interviewDate ? { date: interviewDate } : {}),
             ...(interviewInterviewer ? { interviewer: interviewInterviewer } : {}),
+            ...(interviewQuery.trim() ? { q: interviewQuery.trim() } : {}),
           },
         },
         'replace',
@@ -1355,9 +1400,12 @@ function App() {
     interviewRole,
     interviewDate,
     interviewInterviewer,
+    interviewQuery,
     rankPosition,
     assessmentCohort,
     assessmentTab,
+    jobsStatusFilter,
+    jobsQuery,
   ])
 
   useEffect(() => {
@@ -2496,46 +2544,75 @@ function App() {
         >
           {activePage !== 'overview' && usesCanonicalPageHeader(activePage) ? (
             <HrPageHeader
-              className="mb-6"
-              density="page"
+              className={cn(
+                'mb-6',
+                (activePage === 'ai' || activePage === 'calendar') && 'mb-2 border-0 pb-0',
+              )}
+              density={activePage === 'ai' || activePage === 'calendar' ? 'hero' : 'page'}
               dir={recruitingLocale === 'ar' ? 'rtl' : 'ltr'}
-              eyebrow={recruitingLocale === 'ar' ? 'ما بعد التوظيف' : 'Post-Hire'}
+              eyebrow={
+                activePage === 'calendar'
+                  ? undefined
+                  : isRecruitingPrehirePage(activePage)
+                    ? recruitingLocale === 'ar'
+                      ? 'التوظيف'
+                      : 'Recruiting'
+                    : recruitingLocale === 'ar'
+                      ? 'ما بعد التوظيف'
+                      : 'Post-Hire'
+              }
               title={pageTitle}
-              description={pageSubtitle}
+              description={activePage === 'ai' ? undefined : pageSubtitle}
               actions={
-                busy ? (
-                  <div className="rounded-full border border-semantic-line/50 bg-semantic-surface/80 px-3.5 py-2 text-xs font-medium text-semantic-mist" data-interaction-shell-busy>
-                    {notice.text && !/^refreshing hiring data/i.test(notice.text)
-                      ? notice.text
-                      : recruitingLocale === 'ar'
-                        ? 'جاري العمل...'
-                        : 'Working…'}
-                  </div>
-                ) : notice.text ? (
-                  <div
-                    className={cn(
-                      'flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium',
-                      notice.tone === 'success'
-                        ? 'border-semantic-success/60 bg-semantic-success-soft/80 text-semantic-success-ink'
-                        : notice.tone === 'error'
-                          ? 'border-semantic-danger/60 bg-semantic-danger-soft/85 text-semantic-danger-ink'
-                          : 'border-semantic-line/50 bg-semantic-surface/80 text-semantic-mist',
-                    )}
-                    role="status"
-                  >
-                    <span>{notice.text}</span>
-                    {notice.tone === 'error' ? (
-                      <button
-                        type="button"
-                        onClick={() => setNotice('')}
-                        aria-label={recruitingLocale === 'ar' ? 'إخفاء' : 'Dismiss'}
-                        className="-me-1 ms-0.5 rounded-full px-1 text-semantic-danger-ink/80 hover:text-semantic-danger-ink"
-                      >
-                        ×
-                      </button>
-                    ) : null}
-                  </div>
-                ) : null
+                <div className="flex flex-wrap items-center gap-2">
+                  {busy ? (
+                    <div className="rounded-full border border-semantic-line/50 bg-semantic-surface/80 px-3.5 py-2 text-xs font-medium text-semantic-mist" data-interaction-shell-busy>
+                      {notice.text && !/^refreshing hiring data/i.test(notice.text)
+                        ? notice.text
+                        : recruitingLocale === 'ar'
+                          ? 'جاري العمل...'
+                          : 'Working…'}
+                    </div>
+                  ) : notice.text ? (
+                    <div
+                      className={cn(
+                        'flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium',
+                        notice.tone === 'success'
+                          ? 'border-semantic-success/60 bg-semantic-success-soft/80 text-semantic-success-ink'
+                          : notice.tone === 'error'
+                            ? 'border-semantic-danger/60 bg-semantic-danger-soft/85 text-semantic-danger-ink'
+                            : 'border-semantic-line/50 bg-semantic-surface/80 text-semantic-mist',
+                      )}
+                      role="status"
+                    >
+                      <span>{notice.text}</span>
+                      {notice.tone === 'error' ? (
+                        <button
+                          type="button"
+                          onClick={() => setNotice('')}
+                          aria-label={recruitingLocale === 'ar' ? 'إخفاء' : 'Dismiss'}
+                          className="-me-1 ms-0.5 rounded-full px-1 text-semantic-danger-ink/80 hover:text-semantic-danger-ink"
+                        >
+                          ×
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {!accessIssue && !showingInviteAcceptance && isRecruitingPrehirePage(activePage) ? (
+                    <Button
+                      className={pagePersonality === 'spatial' ? 'h-8 w-8 px-0 text-xs text-mist' : 'h-8 px-3 text-xs'}
+                      disabled={busy}
+                      onClick={() => refreshEverything()}
+                      size="sm"
+                      variant="secondary"
+                      aria-label={recruitingLocale === 'ar' ? 'تحديث' : 'Refresh'}
+                      title={recruitingLocale === 'ar' ? 'تحديث' : 'Refresh'}
+                    >
+                      {busy ? <Loader2 className="animate-spin" size={14} /> : <RefreshCw size={14} />}
+                      {pagePersonality === 'spatial' ? null : recruitingLocale === 'ar' ? 'تحديث' : 'Refresh'}
+                    </Button>
+                  ) : null}
+                </div>
               }
             />
           ) : null}
