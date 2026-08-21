@@ -204,8 +204,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/prehire/notifications',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
-    notes: 'Alerts & Delivery. Visible when pre_hiring or any post-hire module is on.',
+    migration_status: 'canonical',
+    notes: 'Phase 8 workspace. Alerts & Delivery. Visible when pre_hiring or any post-hire module is on. Filter (`?tab=`) is URL-backed. Delivery/channel authority stays backend-canonical.',
   },
   {
     page: 'reports',
@@ -460,7 +460,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/audit',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
+    migration_status: 'canonical',
+    notes: 'Phase 8 workspace. Immutable backend audit via /dashboard/audit. Search, date range, and result (`q`, `date`, `date_end`, `status`) are URL-backed. The UI displays backend events — it does not reinterpret them.',
   },
   {
     page: 'settings',
@@ -471,7 +472,8 @@ const PAGE_DEFS: PageDef[] = [
     api_authority: '/dashboard/settings + /dashboard/users',
     in_sidebar: true,
     in_capability: true,
-    migration_status: 'preserve',
+    migration_status: 'canonical',
+    notes: 'Phase 8 workspace. Configuration-oriented Settings. Sections stay URL-backed via ?tab=. Advanced remains admin recovery/diagnostics — not merged into Integrations. Business configuration semantics unchanged.',
   },
 ]
 
@@ -577,6 +579,7 @@ const WORKSPACE_TABS: Record<string, string[]> = {
   inbox: ['needs_action', 'due_soon', 'blocked', 'all'],
   requisitions: ['attention', 'draft', 'pending_approval', 'approved', 'open', 'filled'],
   calendar: ['day', 'week', 'month'],
+  notifications: ['needs_follow_up', 'failed', 'retrying', 'resolved', 'all'],
 }
 
 const NESTED: HrWebSurface[] = [
@@ -1180,8 +1183,8 @@ for (const section of SETTINGS_SECTIONS) {
       migration_status: section === 'advanced' ? 'consolidate' : 'canonical',
       notes:
         section === 'advanced'
-          ? 'Capability registry still names this settings.platform. SettingsPage id is advanced. Section is URL-backed via ?tab=.'
-          : 'Settings section is URL-backed via ?tab=. Unauthorized sections still fall back in-page.',
+          ? 'Phase 8. Capability registry still names this settings.platform. SettingsPage id is advanced. Admin-only recovery/diagnostics — not merged into Integrations. URL-backed via ?tab=.'
+          : 'Phase 8. Settings section is URL-backed via ?tab=. Unauthorized sections still fall back in-page. Configuration semantics unchanged.',
     }),
   )
 }
@@ -1219,7 +1222,9 @@ for (const [page, tabs] of Object.entries(WORKSPACE_TABS)) {
           page === 'workforce-planning' ||
           page === 'job-architecture' ||
           page === 'requisitions' ||
-          page === 'calendar'
+          page === 'calendar' ||
+          page === 'notifications' ||
+          page === 'settings'
             ? 'canonical'
             : 'enterprise',
         notes:
@@ -1243,6 +1248,10 @@ for (const [page, tabs] of Object.entries(WORKSPACE_TABS)) {
                 ? 'Phase 6 enterprise flagship. Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.'
                 : page === 'requisitions' || page === 'calendar'
                   ? 'Phase 7 recruiting. Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.'
+                : page === 'notifications'
+                  ? 'Phase 8 workspace. Delivery issue filter is URL-backed via ?tab=. Refresh/back/forward restore the same chrome. Channel/delivery authority stays backend-canonical.'
+                : page === 'settings'
+                  ? 'Phase 8 workspace. Settings section is URL-backed via ?tab=. Configuration semantics unchanged.'
                 : 'Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.',
       }),
     )

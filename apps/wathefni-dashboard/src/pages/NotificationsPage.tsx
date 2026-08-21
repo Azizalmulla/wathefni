@@ -14,7 +14,8 @@ import {
 } from '@/lib/api'
 import { scopeDeliveryNotificationRows } from '@/lib/moduleWorkspace'
 import { canManageAlertsAndDelivery } from '@/lib/alertsDeliveryAccess'
-import { cn } from '@/lib/utils'
+import { useUrlBackedTab } from '@/lib/hrWebUrlTab'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { EmptyState } from '@/pages/shared/primitives'
 import { ResourceState } from '@/pages/shared/dataState'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
@@ -29,6 +30,8 @@ import type {
 
 type IssueFilter = 'needs_follow_up' | 'failed' | 'retrying' | 'resolved' | 'all'
 type IssueBucket = IssueFilter
+
+const ALERT_FILTERS = ['needs_follow_up', 'failed', 'retrying', 'resolved', 'all'] as const
 
 type LiveIssue = {
   id: string
@@ -452,7 +455,7 @@ export function NotificationsPage({
 }) {
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
-  const [filter, setFilter] = useState<IssueFilter>('needs_follow_up')
+  const [filter, setFilter] = useUrlBackedTab<IssueFilter>('notifications', ALERT_FILTERS, 'needs_follow_up')
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [resolvingId, setResolvingId] = useState<string | null>(null)
   const [openTasks, setOpenTasks] = useState<HrTask[]>([])
@@ -633,48 +636,38 @@ export function NotificationsPage({
       {canManage ? (
       <>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 max-w-2xl space-y-1">
-          <p className="text-[13px] text-subtle/90">
-            {isAr
-              ? 'اعرض رسائل الموظفين التي فشلت أو تحتاج متابعة، سبب الفشل، وأأمن إجراء تالٍ.'
-              : 'See which employee communications failed or need follow-up, why delivery failed, and the safest next action.'}
-          </p>
-          <p className="text-[12px] text-subtle/80" data-alerts-summary>
-            {error || notificationsFeedError
-              ? isAr
-                ? 'تعذر تحميل بعض مشاكل التسليم'
-                : 'Some delivery issues could not be loaded'
-              : counts.live
-              ? isAr
-                ? `${counts.live} مشكلة تسليم تحتاج انتباهاً`
-                : `${counts.live} delivery issue${counts.live === 1 ? '' : 's'} need attention`
-              : isAr
-                ? 'لا مشاكل تسليم تحتاج انتباهاً الآن'
-                : 'No delivery issues need attention right now'}
-            {openTotal ? ` · ${isAr ? 'مهام مفتوحة' : 'open tasks'} ${openTotal}` : ''}
-          </p>
-        </div>
-        <Button variant="ghost" size="sm" onClick={() => void reload()} disabled={loading || refreshing} aria-label={isAr ? 'تحديث' : 'Refresh'}>
-          {loading || refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-        </Button>
+        <p className="min-w-0 max-w-2xl text-[12px] text-subtle/80" data-alerts-summary>
+          {error || notificationsFeedError
+            ? isAr
+              ? 'تعذر تحميل بعض مشاكل التسليم'
+              : 'Some delivery issues could not be loaded'
+            : counts.live
+            ? isAr
+              ? `${counts.live} مشكلة تسليم تحتاج انتباهاً`
+              : `${counts.live} delivery issue${counts.live === 1 ? '' : 's'} need attention`
+            : isAr
+              ? 'لا مشاكل تسليم تحتاج انتباهاً الآن'
+              : 'No delivery issues need attention right now'}
+          {openTotal ? ` · ${isAr ? 'مهام مفتوحة' : 'open tasks'} ${openTotal}` : ''}
+        </p>
       </div>
 
-      <div className="flex flex-wrap gap-2" data-alerts-filters>
-        {filterChips.map((chip) => (
-          <button
-            key={chip.key}
-            type="button"
-            onClick={() => setFilter(chip.key)}
-            className={cn(
-              'rounded-full border px-3.5 py-1.5 text-[12.5px] font-medium transition',
-              filter === chip.key
-                ? 'border-ink bg-ink text-white'
-                : 'border-line/60 bg-white/60 text-subtle hover:border-[#c89445]/40 hover:text-ink',
-            )}
-          >
-            {chip.label} {chip.count ? <span className="tabular-nums">({chip.count})</span> : null}
-          </button>
-        ))}
+      <div data-alerts-filters>
+        <HrSurfaceTabs
+          ariaLabel={isAr ? 'تصفية مشاكل التسليم' : 'Delivery issue filters'}
+          items={filterChips.map((chip) => ({
+            id: chip.key,
+            label: chip.label,
+            count: chip.count,
+          }))}
+          onChange={setFilter}
+          trailing={
+            <Button variant="ghost" size="sm" onClick={() => void reload()} disabled={loading || refreshing} aria-label={isAr ? 'تحديث' : 'Refresh'}>
+              {loading || refreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            </Button>
+          }
+          value={filter}
+        />
       </div>
 
       {refreshing && !loading ? (
@@ -719,7 +712,7 @@ export function NotificationsPage({
             return (
               <div
                 key={issue.id}
-                className="rounded-[1.25rem] border border-line/55 bg-white/80 px-4 py-3 shadow-[0_10px_24px_rgba(35,33,29,0.05)]"
+                className="rounded-[1.25rem] border border-semantic-line/55 bg-semantic-surface/80 px-4 py-3"
                 data-alerts-issue
                 data-issue-bucket={issue.bucket}
               >

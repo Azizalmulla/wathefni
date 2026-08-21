@@ -100,9 +100,4 @@ describe('HR Web Phase 6 enterprise flagship UX', () => {
     expect(byId['drawer.analytics.metric']?.url_state).toBe('query')
     expect(byId['drawer.analytics.metric']?.notes || '').toMatch(/Phase 6/)
   })
-
-  it('does not restyle Settings', () => {
-    const settings = read('pages/SettingsPage.tsx')
-    expect(settings).not.toContain('HrSurfaceTabs')
-  })
 })

@@ -3,7 +3,7 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { describe, expect, test, vi } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import { SettingsPage } from '@/pages/SettingsPage'
 import { renderWithProviders } from '@/test/render'
@@ -132,6 +132,10 @@ const settingsBase = {
 }
 
 describe('Settings Email sending Communications', () => {
+  afterEach(() => {
+    window.history.replaceState({}, '', '/dashboard?page=settings')
+    vi.unstubAllGlobals()
+  })
   test('source keeps product language only (no SP/RBAC jargon)', () => {
     const src = readFileSync(resolve(__dirname, '../pages/SettingsPage.tsx'), 'utf8')
     expect(src).toContain('Email sending')
@@ -201,6 +205,7 @@ describe('Settings Email sending Communications', () => {
   })
 
   test('does not invent WATHEFNI when the company code is empty', () => {
+    window.history.replaceState({}, '', '/dashboard?page=settings')
     renderWithProviders(
       <SettingsPage
         {...settingsBase}

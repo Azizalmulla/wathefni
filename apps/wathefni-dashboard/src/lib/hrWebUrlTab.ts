@@ -37,6 +37,7 @@ export const URL_BACKED_WORKSPACE_TABS = {
   inbox: ['needs_action', 'due_soon', 'blocked', 'all'],
   requisitions: ['attention', 'draft', 'pending_approval', 'approved', 'open', 'filled'],
   calendar: ['day', 'week', 'month'],
+  notifications: ['needs_follow_up', 'failed', 'retrying', 'resolved', 'all'],
 } as const
 
 export const URL_BACKED_VIEW_PAGES = {

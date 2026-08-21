@@ -216,6 +216,15 @@ export function buildDashboardSearchParams(
     const dateEnd = String(filters.date_end || '').trim()
     if (date) params.set('date', date)
     if (dateEnd) params.set('date_end', dateEnd)
+  } else if (state.page === 'activity') {
+    const q = String(filters.q || '').trim()
+    const date = String(filters.date || '').trim()
+    const dateEnd = String(filters.date_end || '').trim()
+    const status = String(filters.status || '').trim()
+    if (q) params.set('q', q)
+    if (date) params.set('date', date)
+    if (dateEnd) params.set('date_end', dateEnd)
+    if (status && status !== 'all') params.set('status', status)
   } else if (
     state.page === 'analytics' ||
     state.page === 'employee-relations' ||

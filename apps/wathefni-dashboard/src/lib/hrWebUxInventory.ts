@@ -29,7 +29,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'App.tsx page header + PageIntro',
     path: 'src/App.tsx + src/components/ui/page-chrome.tsx',
     disposition: 'consolidate',
-    notes: 'Overview uses HrPageHeader as the reference. Operational core, People spine, Phase 6 enterprise, and Phase 7 recruiting use density=page (chat/calendar use compact hero) via usesCanonicalPageHeader. Settings / Alerts / Activity keep the App h1 until a later phase.',
+    notes: 'Overview uses HrPageHeader as the reference. Operational core, People spine, Phase 6 enterprise, Phase 7 recruiting, and Phase 8 Settings / Alerts / Activity use density=page (chat/calendar use compact hero) via usesCanonicalPageHeader. Palette is not frozen.',
   },
   {
     id: 'actions.button',
@@ -61,7 +61,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'Post-hire workspace Tab unions',
     path: 'src/posthire/*Workspace.tsx',
     disposition: 'consolidate',
-    notes: 'Enterprise workspaces and Settings are URL-backed. Phase 6: Performance/Talent/Learning/Benefits/ER/Engagement/Comp/Workforce Planning/Job Architecture use HrSurfaceTabs + `?tab=`. Intelligence metric via `?q=`. Phase 7: Requisitions and Calendar use `?tab=`. Settings chrome stays later.',
+    notes: 'Enterprise workspaces and Settings are URL-backed. Phase 6: Performance/Talent/Learning/Benefits/ER/Engagement/Comp/Workforce Planning/Job Architecture use HrSurfaceTabs + `?tab=`. Intelligence metric via `?q=`. Phase 7: Requisitions and Calendar use `?tab=`. Phase 8: Settings sections and Alerts filters use HrSurfaceTabs + `?tab=`.',
   },
   {
     id: 'search.filters',
@@ -69,7 +69,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'dashboardNavigation + SearchInput',
     path: 'src/lib/dashboardNavigation.ts + src/components/ui/search-input.tsx',
     disposition: 'preserve',
-    notes: 'Candidates/Interviews/Assessments filters are already URL-canonical. Phase 6 also writes `?q=` for Intelligence metric, ER case, Engagement campaign, and Compensation cycle. Phase 7 writes Jobs `?status=`/`?q=`, Requisitions selected id via `?q=`, Calendar `?date=`, and Interview search `?q=`. Shifts org filters stay local (scope, not chrome).',
+    notes: 'Candidates/Interviews/Assessments filters are already URL-canonical. Phase 6 also writes `?q=` for Intelligence metric, ER case, Engagement campaign, and Compensation cycle. Phase 7 writes Jobs `?status=`/`?q=`, Requisitions selected id via `?q=`, Calendar `?date=`, and Interview search `?q=`. Phase 8 writes Alerts `?tab=` and Activity `?q=`/`?date=`/`?date_end=`/`?status=`. Shifts org filters stay local (scope, not chrome).',
   },
   {
     id: 'tables.lists',

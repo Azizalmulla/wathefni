@@ -2,6 +2,7 @@ import { Copy, Inbox, Loader2, LogOut, MessageCircle, Plus } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { useUrlBackedTab, SETTINGS_SECTIONS } from '@/lib/hrWebUrlTab'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 
 import { useConfirm } from '@/components/ConfirmDialog'
 import { ConfigureInSetupBanner } from '@/components/ConfigureInSetupBanner'
@@ -205,25 +206,17 @@ export function SettingsPage({
 
   return (
     <div className="space-y-5" dir={isAr ? 'rtl' : 'ltr'} lang={locale} data-testid="settings-workspace" data-settings data-settings-ia-closure>
-      <div className="flex flex-wrap gap-2" data-settings-nav role="tablist" aria-label={isAr ? 'أقسام الإعدادات' : 'Settings sections'}>
-        {visibleNav.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            role="tab"
-            aria-selected={activeSection === item.id}
-            data-settings-nav-item={item.id}
-            className={cn(
-              'rounded-full border px-3.5 py-1.5 text-[12.5px] font-medium transition',
-              activeSection === item.id
-                ? 'border-ink bg-ink text-white'
-                : 'border-line/60 bg-white/60 text-subtle hover:border-[#c89445]/40 hover:text-ink',
-            )}
-            onClick={() => setSection(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
+      <div data-settings-nav>
+        <HrSurfaceTabs
+          ariaLabel={isAr ? 'أقسام الإعدادات' : 'Settings sections'}
+          items={visibleNav.map((item) => ({
+            id: item.id,
+            label: item.label,
+            dataAttrs: { 'data-settings-nav-item': item.id },
+          }))}
+          onChange={setSection}
+          value={activeSection}
+        />
       </div>
 
       {activeSection === 'account' ? (
@@ -235,7 +228,7 @@ export function SettingsPage({
             </CardHeader>
             <CardContent className="space-y-4">
               {recoveryAccess ? (
-                <div className="rounded-2xl border border-[#e8c47d]/55 bg-[#fff7e6]/80 p-4 text-sm leading-6 text-[#8a5a12]">
+                <div className="rounded-2xl border border-semantic-warning/55 bg-semantic-warning-soft/80 p-4 text-sm leading-6 text-semantic-warning-ink">
                   {isAr
                     ? 'أنت مسجّل الدخول برمز وصول احتياطي. سجّل الدخول بحساب مساحة العمل للاستخدام اليومي.'
                     : 'You’re signed in with a backup access code. Sign in with a workspace account for everyday use.'}
@@ -310,7 +303,7 @@ export function SettingsPage({
                   {isAr ? 'ينشئ OctoHR رابط دعوة آمناً — شاركه مباشرة.' : 'OctoHR creates a secure invite link — share it directly.'}
                 </p>
                 {createdInviteLink ? (
-                  <div className="rounded-2xl border border-[#e8c47d]/55 bg-[#fff7e6]/80 p-4">
+                  <div className="rounded-2xl border border-semantic-warning/55 bg-semantic-warning-soft/80 p-4">
                     <div className="text-sm font-semibold text-text">{isAr ? 'رابط الدعوة جاهز' : 'Invite link ready'}</div>
                     <p className="mt-1 text-xs leading-5 text-subtle">{isAr ? 'شاركه مع العضو الجديد. ينتهي تلقائياً.' : 'Share it with the new teammate. It expires automatically.'}</p>
                     <div className="mt-3 flex flex-col gap-2 md:flex-row">
@@ -344,7 +337,7 @@ export function SettingsPage({
             ) : null}
             <div className="overflow-x-auto rounded-3xl border border-line/55 bg-panel/75">
               <table className="w-full min-w-[720px] text-left text-sm">
-                <thead className="bg-[#f7f1e7]/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
+                <thead className="bg-semantic-accent-soft/72 text-[11px] font-semibold uppercase tracking-[0.2em] text-mist">
                   <tr>
                     <th className="px-4 py-3">{isAr ? 'الاسم' : 'Name'}</th>
                     {canManageUsers || team?.directory_view === 'admin' ? (
@@ -500,7 +493,7 @@ export function SettingsPage({
                     {visibilityUpdatedAt ? ` · ${new Date(visibilityUpdatedAt).toLocaleString(isAr ? 'ar-KW' : 'en-GB')}` : ''}
                   </p>
                 ) : null}
-                {visibilityError ? <p className="text-xs text-[#9b3d3d]">{visibilityError}</p> : null}
+                {visibilityError ? <p className="text-xs text-semantic-danger-ink">{visibilityError}</p> : null}
               </CardContent>
             </Card>
           ) : null}
@@ -527,7 +520,7 @@ export function SettingsPage({
 
       {activeSection === 'integrations' && canSeeIntegrations ? (
         <div className="space-y-3" data-settings-section="integrations" data-settings-integrations>
-          {platformNotice ? <p className="text-sm text-[#3f6b3a]">{platformNotice}</p> : null}
+          {platformNotice ? <p className="text-sm text-semantic-success-ink">{platformNotice}</p> : null}
           <ConfigureInSetupBanner
             locale={isAr ? 'ar' : 'en'}
             title={isAr ? 'تشغيل الوحدات والأنظمة' : 'Modules & connected systems'}
@@ -1470,8 +1463,8 @@ function MailboxConnectorCard({ access, locale }: { access: DashboardAccess; loc
             className={cn(
               'rounded-2xl border p-3 text-sm leading-6',
               notice.tone === 'success'
-                ? 'border-emerald-300/60 bg-emerald-50/70 text-emerald-800'
-                : 'border-[#e8c47d]/55 bg-[#fff7e6]/80 text-[#8a5a12]',
+                ? 'border-semantic-success/60 bg-semantic-success-soft/70 text-semantic-success-ink'
+                : 'border-semantic-warning/55 bg-semantic-warning-soft/80 text-semantic-warning-ink',
             )}
           >
             {notice.text}

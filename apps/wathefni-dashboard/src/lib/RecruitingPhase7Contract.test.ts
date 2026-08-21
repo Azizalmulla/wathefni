@@ -130,13 +130,4 @@ describe('HR Web Phase 7 recruiting / pre-hiring UX', () => {
     expect(byId['tab.interviews.upcoming']?.url_state).toBe('query')
     expect(byId['tab.assessments.send']?.url_state).toBe('query')
   })
-
-  it('does not restyle Settings / Alerts / Activity', () => {
-    expect(read('pages/SettingsPage.tsx')).not.toContain('HrSurfaceTabs')
-    expect(read('pages/NotificationsPage.tsx')).not.toContain('HrSurfaceTabs')
-    const byId = Object.fromEntries(HR_WEB_SURFACE_REGISTRY.map((row) => [row.surface_id, row]))
-    expect(byId['page.settings']?.notes || '').not.toMatch(/Phase 7/)
-    expect(byId['page.notifications']?.migration_status).not.toBe(undefined)
-    expect(byId['page.activity']?.notes || '').not.toMatch(/Phase 7/)
-  })
 })

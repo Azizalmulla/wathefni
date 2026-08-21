@@ -11,7 +11,7 @@ describe('Settings Wave 1 IA Closure contract', () => {
     expect(settingsSrc).toContain('data-settings')
     expect(settingsSrc).toContain('data-settings-ia-closure')
     expect(settingsSrc).toContain('data-settings-nav')
-    expect(settingsSrc).toContain("data-settings-nav-item={item.id}")
+    expect(settingsSrc).toContain('data-settings-nav-item')
     expect(settingsSrc).toContain('data-settings-section="account"')
     expect(settingsSrc).toContain('data-settings-section="team"')
     expect(settingsSrc).toContain('data-settings-section="company"')

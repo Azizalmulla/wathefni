@@ -108,9 +108,4 @@ describe('HR Web Phase 5 People spine UX', () => {
     expect(byId['tab.onboarding.needs_attention']?.url_state).toBe('query')
     expect(byId['tab.inbox.needs_action']?.url_state).toBe('query')
   })
-
-  it('does not restyle Settings', () => {
-    const settings = read('pages/SettingsPage.tsx')
-    expect(settings).not.toContain('HrSurfaceTabs')
-  })
 })

@@ -64,9 +64,4 @@ describe('HR Web Phase 4 operational core UX', () => {
     expect(byId['tab.attendance.capture']?.url_state).toBe('query')
     expect(byId['tab.attendance.capture']?.notes || '').toMatch(/local/)
   })
-
-  it('does not restyle Settings in this phase', () => {
-    const settings = read('pages/SettingsPage.tsx')
-    expect(settings).not.toContain('HrSurfaceTabs')
-  })
 })

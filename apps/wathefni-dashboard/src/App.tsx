@@ -231,12 +231,17 @@ function isRecruitingPrehirePage(page: Page | string): boolean {
   )
 }
 
+function isWorkspaceOpsPage(page: Page | string): boolean {
+  return page === 'settings' || page === 'notifications' || page === 'activity'
+}
+
 function usesCanonicalPageHeader(page: Page | string): boolean {
   return (
     isOperationalCorePage(page) ||
     isPeopleSpinePage(page) ||
     isEnterpriseFlagshipPage(page) ||
-    isRecruitingPrehirePage(page)
+    isRecruitingPrehirePage(page) ||
+    isWorkspaceOpsPage(page)
   )
 }
 
@@ -2557,9 +2562,13 @@ function App() {
                     ? recruitingLocale === 'ar'
                       ? 'التوظيف'
                       : 'Recruiting'
-                    : recruitingLocale === 'ar'
-                      ? 'ما بعد التوظيف'
-                      : 'Post-Hire'
+                    : isWorkspaceOpsPage(activePage)
+                      ? recruitingLocale === 'ar'
+                        ? 'مساحة العمل'
+                        : 'Workspace'
+                      : recruitingLocale === 'ar'
+                        ? 'ما بعد التوظيف'
+                        : 'Post-Hire'
               }
               title={pageTitle}
               description={activePage === 'ai' ? undefined : pageSubtitle}

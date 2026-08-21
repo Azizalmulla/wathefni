@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input, Select } from '@/components/ui/field'
 import { cn } from '@/lib/utils'
+import { useUrlBackedParam } from '@/lib/hrWebUrlTab'
 import { ResourceState } from '@/pages/shared/dataState'
 import { useEmployees360Locale } from '@/posthire/employees360/chrome'
 import type { ActivityActorOption, ActivityItem, ActivityResponse, DashboardAccess } from '@/types'
@@ -115,16 +116,6 @@ type Filters = {
   q: string
 }
 
-const EMPTY_FILTERS: Filters = {
-  start_date: '',
-  end_date: '',
-  actor: '',
-  category: 'all',
-  action_type: '',
-  status: 'all',
-  q: '',
-}
-
 function humanizeActionType(actionType: string, isAr: boolean): string {
   if (isAr && ACTION_VERBS_AR[actionType]) return ACTION_VERBS_AR[actionType]
   if (ACTION_VERBS_EN[actionType]) return ACTION_VERBS_EN[actionType]
@@ -190,7 +181,25 @@ export function ActivityLog({
 }) {
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
-  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
+  const [q, setQ] = useUrlBackedParam('activity', 'q', '', 'replace')
+  const [startDate, setStartDate] = useUrlBackedParam('activity', 'date', '', 'replace')
+  const [endDate, setEndDate] = useUrlBackedParam('activity', 'date_end', '', 'replace')
+  const [status, setStatus] = useUrlBackedParam('activity', 'status', 'all', 'replace')
+  const [actor, setActor] = useState('')
+  const [category, setCategory] = useState('all')
+  const [actionType, setActionType] = useState('')
+  const filters = useMemo<Filters>(
+    () => ({
+      start_date: startDate,
+      end_date: endDate,
+      actor,
+      category,
+      action_type: actionType,
+      status,
+      q,
+    }),
+    [startDate, endDate, actor, category, actionType, status, q],
+  )
   const [items, setItems] = useState<ActivityItem[]>([])
   const [meta, setMeta] = useState<{ total: number; hasMore: boolean; actors: ActivityActorOption[]; categories: string[] } | null>(
     null,
@@ -338,7 +347,7 @@ export function ActivityLog({
   if (permissionDenied) {
     return (
       <div
-        className="rounded-[1.25rem] border border-line/55 bg-white/80 px-4 py-5 text-[13px] text-muted"
+        className="rounded-[1.25rem] border border-semantic-line/55 bg-semantic-surface/80 px-4 py-5 text-[13px] text-muted"
         dir={isAr ? 'rtl' : 'ltr'}
         lang={locale}
         data-testid="activity-workspace"
@@ -364,23 +373,16 @@ export function ActivityLog({
   return (
     <div className="space-y-5" dir={isAr ? 'rtl' : 'ltr'} lang={locale} data-testid="activity-workspace" data-activity-timeline>
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 max-w-2xl space-y-1">
-          <p className="text-[13px] text-subtle/90">
-            {isAr
-              ? 'جدول زمني موثوق للقراءة فقط لأهم نشاط الشركة والموارد البشرية.'
-              : 'A clear, trustworthy, read-only timeline of important company and HR activity.'}
-          </p>
-          <p className="text-[12px] text-subtle/80" data-activity-summary>
-            {meta
-              ? isAr
-                ? `${meta.total} حدث`
-                : `${meta.total} event${meta.total === 1 ? '' : 's'}`
-              : isAr
-                ? 'سجل تدقيق على مستوى الشركة'
-                : 'Company-wide audit timeline'}
-            {filtersActive && meta ? (isAr ? ' · مطابق للتصفية' : ' · matching filters') : ''}
-          </p>
-        </div>
+        <p className="min-w-0 max-w-2xl text-[12px] text-subtle/80" data-activity-summary>
+          {meta
+            ? isAr
+              ? `${meta.total} حدث`
+              : `${meta.total} event${meta.total === 1 ? '' : 's'}`
+            : isAr
+              ? 'سجل تدقيق على مستوى الشركة'
+              : 'Company-wide audit timeline'}
+          {filtersActive && meta ? (isAr ? ' · مطابق للتصفية' : ' · matching filters') : ''}
+        </p>
         <Button onClick={() => void exportCsv()} type="button" variant="secondary" size="sm" disabled={exporting || loading} data-activity-export>
           {exporting ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
           {isAr ? 'تصدير CSV' : 'Export CSV'}
@@ -390,15 +392,15 @@ export function ActivityLog({
       <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3" data-activity-filters>
         <label className="flex flex-col gap-1 text-xs font-medium text-subtle">
           {isAr ? 'من' : 'From'}
-          <Input type="date" value={filters.start_date} onChange={(e) => setFilters((f) => ({ ...f, start_date: e.target.value }))} />
+          <Input type="date" value={filters.start_date} onChange={(e) => setStartDate(e.target.value)} />
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-subtle">
           {isAr ? 'إلى' : 'To'}
-          <Input type="date" value={filters.end_date} onChange={(e) => setFilters((f) => ({ ...f, end_date: e.target.value }))} />
+          <Input type="date" value={filters.end_date} onChange={(e) => setEndDate(e.target.value)} />
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-subtle">
           {isAr ? 'المنفّذ' : 'Actor'}
-          <Select value={filters.actor} onChange={(e) => setFilters((f) => ({ ...f, actor: e.target.value }))}>
+          <Select value={filters.actor} onChange={(e) => setActor(e.target.value)}>
             <option value="">{isAr ? 'الجميع' : 'Everyone'}</option>
             {(meta?.actors || []).map((actor) => (
               <option key={actor.user_id || actor.email || actorOptionLabel(actor)} value={actor.user_id || actor.email || ''}>
@@ -409,7 +411,7 @@ export function ActivityLog({
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-subtle">
           {isAr ? 'الوحدة / الفئة' : 'Module / category'}
-          <Select value={filters.category} onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}>
+          <Select value={filters.category} onChange={(e) => setCategory(e.target.value)}>
             <option value="all">{isAr ? 'كل الفئات' : 'All categories'}</option>
             {(meta?.categories || []).map((category) => (
               <option key={category} value={category}>
@@ -420,7 +422,7 @@ export function ActivityLog({
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-subtle">
           {isAr ? 'الإجراء' : 'Action'}
-          <Select value={filters.action_type} onChange={(e) => setFilters((f) => ({ ...f, action_type: e.target.value }))}>
+          <Select value={filters.action_type} onChange={(e) => setActionType(e.target.value)}>
             <option value="">{isAr ? 'كل الإجراءات' : 'All actions'}</option>
             {actionTypeOptions.map((actionType) => (
               <option key={actionType} value={actionType}>
@@ -431,7 +433,7 @@ export function ActivityLog({
         </label>
         <label className="flex flex-col gap-1 text-xs font-medium text-subtle">
           {isAr ? 'النتيجة' : 'Result'}
-          <Select value={filters.status} onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}>
+          <Select value={filters.status} onChange={(e) => setStatus(e.target.value || 'all')}>
             <option value="all">{isAr ? 'كل النتائج' : 'All results'}</option>
             <option value="done">{isAr ? 'تم' : 'Done'}</option>
             <option value="failed">{isAr ? 'فشل' : 'Failed'}</option>
@@ -450,7 +452,7 @@ export function ActivityLog({
               className={cn('w-full', isAr ? 'pr-9' : 'pl-9')}
               placeholder={isAr ? 'ابحث في النشاط…' : 'Find an activity…'}
               value={filters.q}
-              onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))}
+              onChange={(e) => setQ(e.target.value)}
             />
           </div>
         </label>
@@ -467,7 +469,15 @@ export function ActivityLog({
           </span>
           <button
             type="button"
-            onClick={() => setFilters(EMPTY_FILTERS)}
+            onClick={() => {
+              setQ('')
+              setStartDate('')
+              setEndDate('')
+              setStatus('all')
+              setActor('')
+              setCategory('all')
+              setActionType('')
+            }}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-subtle underline-offset-2 hover:text-text hover:underline"
           >
             <RotateCcw size={13} /> {isAr ? 'مسح التصفية' : 'Clear filters'}
@@ -525,7 +535,7 @@ export function ActivityLog({
                 <span className="h-px flex-1 bg-line/55" />
                 <span className="text-[11px] text-subtle/70 tabular-nums">{group.items.length}</span>
               </div>
-              <ul className="overflow-hidden rounded-[1.25rem] border border-line/55 divide-y divide-line/40">
+              <ul className="overflow-hidden rounded-[1.25rem] border border-semantic-line/55 divide-y divide-semantic-line/40">
                 {group.items.map((item) => {
                   const outcome = statusMeta(item.status, isAr)
                   const who = actorDisplay(item)
@@ -536,8 +546,10 @@ export function ActivityLog({
                     <li
                       key={item.id}
                       className={cn(
-                        'px-4 py-3 transition-colors',
-                        item.sensitive ? 'border-s-2 border-s-[#c89445] bg-[#fffaf0] hover:bg-[#fff6e6]' : 'bg-white/45 hover:bg-white/70',
+                        'px-4 py-3 transition-colors duration-150 ease-out',
+                        item.sensitive
+                          ? 'border-s-2 border-s-semantic-accent bg-semantic-accent-soft/70 hover:bg-semantic-accent-soft'
+                          : 'bg-semantic-surface/45 hover:bg-semantic-surface/70',
                       )}
                       data-activity-event
                     >

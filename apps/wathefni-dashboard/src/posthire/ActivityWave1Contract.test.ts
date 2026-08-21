@@ -20,7 +20,7 @@ describe('Activity Page Refinement Wave 1 contract', () => {
     expect(activitySrc).toContain('data-activity-filters')
     expect(activitySrc).toContain('data-activity-export')
     expect(activitySrc).toContain('action_type')
-    expect(activitySrc).toContain("status: 'all'")
+    expect(activitySrc).toContain("useUrlBackedParam('activity', 'status', 'all'")
     expect(activitySrc).toContain('downloadCompanyActivityCsv')
     expect(activitySrc).toMatch(/From|من/)
     expect(activitySrc).toMatch(/Actor|المنفّذ/)
