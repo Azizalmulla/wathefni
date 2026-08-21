@@ -295,7 +295,7 @@ export function BankReviewPanel({
 
         {/* Verified vs proposed, side by side, with changes marked. */}
         <div className={layout === 'drawer' ? 'grid grid-cols-1 gap-3' : 'grid gap-3 md:grid-cols-2'}>
-          <div className="rounded-[1.1rem] border border-[#e8dfd0]/80 bg-wf-surface px-4 py-3">
+          <div className="rounded-[1.1rem] border border-semantic-line/80 bg-wf-surface px-4 py-3">
             <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-mist">
               <ShieldCheck className="h-3.5 w-3.5" />
               {isAr ? 'الموثقة حالياً' : 'Currently verified'}
@@ -322,7 +322,7 @@ export function BankReviewPanel({
             ) : null}
           </div>
 
-          <div className="rounded-[1.1rem] border border-[#e8dfd0]/80 bg-panel-muted/40 px-4 py-3">
+          <div className="rounded-[1.1rem] border border-semantic-line/80 bg-panel-muted/40 px-4 py-3">
             <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-mist">
               {comparison?.is_first_submission
                 ? isAr

@@ -208,8 +208,10 @@ export function buildDashboardSearchParams(
     const status = String(filters.status || '').trim()
     const q = String(filters.q || '').trim()
     const tab = String(filters.tab || '').trim()
+    const positionCode = String(filters.position_code || '').trim()
     if (status) params.set('status', status)
     if (q) params.set('q', q)
+    if (state.page === 'jobs' && positionCode) params.set('position_code', positionCode)
     if (state.page === 'requisitions' && tab) params.set('tab', tab)
   } else if (state.page === 'attendance' || state.page === 'calendar') {
     const date = String(filters.date || '').trim()
@@ -225,6 +227,9 @@ export function buildDashboardSearchParams(
     if (date) params.set('date', date)
     if (dateEnd) params.set('date_end', dateEnd)
     if (status && status !== 'all') params.set('status', status)
+  } else if (state.page === 'compliance') {
+    const status = String(filters.status || '').trim()
+    if (status && status !== 'needs_review') params.set('status', status)
   } else if (
     state.page === 'analytics' ||
     state.page === 'employee-relations' ||

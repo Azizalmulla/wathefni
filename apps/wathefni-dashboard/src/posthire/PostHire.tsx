@@ -41,6 +41,7 @@ import { SoftKeepSurface } from '@/components/ui/SoftKeepSurface'
 import {
   EMPLOYEE_ONBOARDING_FILTERS,
   EMPLOYEE_STATUS_FILTERS,
+  COMPLIANCE_FILTERS,
   URL_BACKED_VIEW_PAGES,
   URL_BACKED_WORKSPACE_TABS,
   useUrlBackedDateRange,
@@ -384,59 +385,6 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   )
 }
 
-function ConfirmDialog({
-  text,
-  title,
-  confirmLabel,
-  busy,
-  destructive,
-  onConfirm,
-  onCancel,
-}: {
-  text: string
-  title?: string
-  confirmLabel?: string
-  busy: boolean
-  destructive: boolean
-  onConfirm: () => void
-  onCancel: () => void
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/35 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-[1.6rem] border border-line/60 bg-panel/97 p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)] ring-1 ring-white/60">
-        <div className="flex items-start gap-3">
-          <div
-            className={cn(
-              'flex h-10 w-10 shrink-0 items-center justify-center rounded-full',
-              destructive ? 'bg-rose-50 text-rose-600' : 'bg-[#fff7e8] text-[#8a5a16]',
-            )}
-          >
-            {destructive ? <AlertTriangle className="h-5 w-5" /> : <CheckCircle2 className="h-5 w-5" />}
-          </div>
-          <div className="space-y-1">
-            <p className="text-[15px] font-semibold tracking-[-0.01em] text-text">{title || 'Confirm this action'}</p>
-            <p className="text-[13px] leading-6 text-subtle/95">{text}</p>
-          </div>
-        </div>
-        <div className="mt-6 flex justify-end gap-2">
-          <Button variant="secondary" size="sm" onClick={onCancel} disabled={busy}>
-            Cancel
-          </Button>
-          <Button
-            size="sm"
-            className={destructive ? 'bg-rose-600 hover:bg-rose-600/90' : undefined}
-            onClick={onConfirm}
-            disabled={busy}
-          >
-            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-            {confirmLabel || (destructive ? 'Confirm' : 'Continue')}
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // Contextual copy for the backend-driven confirmation modal (shown when the
 // server asks for an explicit confirmation step). The body text still comes
 // from the backend; this only gives the modal a clear header + action label
@@ -502,12 +450,9 @@ function useModuleData<T>(loader: () => Promise<T>, onAccessIssue?: (issue: Acce
   return { data, loading, refreshing, error, reload }
 }
 
-type PendingConfirmation = { text: string; actionType: string; args: Record<string, unknown>; destructive: boolean }
-
 function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>, onNotice: NoticeFn, onAccessIssue?: (issue: AccessIssue) => void) {
   const askConfirm = useConfirm()
   const isAr = useEmployees360Locale() === 'ar'
-  const [pending, setPending] = useState<PendingConfirmation | null>(null)
   const [busy, setBusy] = useState(false)
   const [runningKey, setRunningKey] = useState<string | null>(null)
   const doneText = isAr ? 'تم.' : 'Done.'
@@ -528,32 +473,31 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
       try {
         const result = await runPosthireAction(access, { action_type: actionType, args })
         if (result.confirmation) {
-          // Prefer server-echoed args; fall back to the original request so an
-          // empty confirmation.args never drops employee_key / item_id.
           const confirmArgs = {
             ...args,
             ...(result.confirmation.args || {}),
           }
-          // The user already confirmed with a polished frontend dialog — don't
-          // stack a second generic modal on top. Auto-confirm the server's step
-          // once by re-sending the identical request (server-side safety stays).
           if (preconfirmed) {
             const confirmed = await runPosthireAction(access, {
               action_type: result.confirmation.action_type,
               args: confirmArgs,
             })
             if (confirmed.confirmation) {
-              // Still asking after the retry — fall back to the modal so we
-              // never silently run something the server wants reconfirmed.
-              setPending({
-                text: confirmed.confirmation.text,
-                actionType: confirmed.confirmation.action_type,
-                args: { ...confirmArgs, ...(confirmed.confirmation.args || {}) },
+              setBusy(false)
+              const copy = BACKEND_CONFIRM_COPY[confirmed.confirmation.action_type]
+              const ok = await askConfirm({
+                title: copy?.title,
+                body: confirmed.confirmation.text,
+                confirmLabel: copy?.confirmLabel,
                 destructive,
+                dir: isAr ? 'rtl' : 'ltr',
               })
-              return false
+              if (!ok) {
+                onNotice(cancelledText, 'info')
+                return false
+              }
+              return execute(confirmed.confirmation.action_type, { ...confirmArgs, ...(confirmed.confirmation.args || {}) }, destructive, `${confirmed.confirmation.action_type}:confirm`, true)
             }
-            setPending(null)
             if (confirmed.ok === false) {
               onNotice(dashboardActionError(confirmed.message, confirmed.status), 'error')
               await reload()
@@ -563,18 +507,21 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
             await reload()
             return true
           }
-          setPending({
-            text: result.confirmation.text,
-            actionType: result.confirmation.action_type,
-            args: confirmArgs,
+          setBusy(false)
+          const copy = BACKEND_CONFIRM_COPY[result.confirmation.action_type]
+          const ok = await askConfirm({
+            title: copy?.title,
+            body: result.confirmation.text,
+            confirmLabel: copy?.confirmLabel,
             destructive,
+            dir: isAr ? 'rtl' : 'ltr',
           })
-          return false
+          if (!ok) {
+            onNotice(cancelledText, 'info')
+            return false
+          }
+          return execute(result.confirmation.action_type, confirmArgs, destructive, `${result.confirmation.action_type}:confirm`, true)
         }
-        setPending(null)
-        // A 200 with ok:false means the action ran but delivery (e.g. a manual
-        // reminder) didn't land. Show the server's failure text with an error
-        // tone instead of a green "success" so HR is never misled.
         if (result.ok === false) {
           onNotice(dashboardActionError(result.message, result.status), 'error')
           await reload()
@@ -584,7 +531,6 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
         await reload()
         return true
       } catch (err) {
-        setPending(null)
         const issue = accessIssueFromError(err)
         if (issue) {
           onAccessIssue?.(issue)
@@ -597,7 +543,7 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
         setRunningKey(null)
       }
     },
-    [access, reload, onNotice, onAccessIssue, doneText, isAr],
+    [access, reload, onNotice, onAccessIssue, doneText, isAr, askConfirm, cancelledText],
   )
 
   const run = useCallback(
@@ -608,14 +554,9 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
     ): Promise<boolean> => {
       const go = async (preconfirmed: boolean) => {
         const ok = await execute(actionType, args, Boolean(options.destructive), options.key || actionType, preconfirmed)
-        // Success-only callback lets call sites reset/close forms only once the
-        // save actually lands — entered values survive a failure.
         if (ok) options.onSuccess?.()
         return ok
       }
-      // When a call site supplies confirm copy, ask first (reusing the global
-      // confirm system). Otherwise run immediately — the backend can still raise
-      // its own confirmation step for actions that need one.
       if (options.confirm) {
         const copy = options.confirm
         return (async () => {
@@ -631,27 +572,7 @@ function usePosthireAction(access: DashboardAccess, reload: () => Promise<void>,
     [execute, askConfirm, onNotice, cancelledText],
   )
 
-  const confirm = useCallback(() => {
-    if (!pending) return
-    void execute(pending.actionType, pending.args, pending.destructive, `${pending.actionType}:confirm`)
-  }, [pending, execute])
-
-  const dialog = pending ? (
-    <ConfirmDialog
-      text={pending.text}
-      title={BACKEND_CONFIRM_COPY[pending.actionType]?.title}
-      confirmLabel={BACKEND_CONFIRM_COPY[pending.actionType]?.confirmLabel}
-      busy={busy}
-      destructive={pending.destructive}
-      onConfirm={confirm}
-      onCancel={() => {
-        setPending(null)
-        onNotice(cancelledText, 'info')
-      }}
-    />
-  ) : null
-
-  return { run, busy, runningKey, dialog }
+  return { run, busy, runningKey, dialog: null as ReactNode }
 }
 
 function employeeRef(emp: { phone?: string; name?: string; employee_phone?: string; employee_name?: string }): Record<string, string> {
@@ -3597,7 +3518,7 @@ function DocumentHrReviewButtons({
         >
           <div
             ref={datesPanelRef}
-            className="w-full max-w-md rounded-[1.6rem] border border-[#e8dfd0] bg-[#fffaf0] p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)]"
+            className="w-full max-w-md rounded-[1.6rem] border border-semantic-line bg-semantic-surface-raised p-6 shadow-[0_30px_80px_rgba(24,20,15,0.28)]"
             onClick={(e) => e.stopPropagation()}
           >
             <p className="text-[15px] font-semibold text-ink">
@@ -3848,7 +3769,7 @@ function OnboardingChecklistItem({
   ) : null
 
   return (
-    <div className="space-y-2 rounded-[0.9rem] border border-[#e8dfd0] bg-[#fffdf8] px-3.5 py-2.5" data-item-id={item.item_id || undefined}>
+    <div className="space-y-2 rounded-[0.9rem] border border-semantic-line bg-semantic-surface-raised px-3.5 py-2.5" data-item-id={item.item_id || undefined}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[13px] font-medium text-text">
@@ -3891,7 +3812,7 @@ function OnboardingChecklistItem({
       </div>
 
       {detailsOpen ? (
-        <div className="space-y-2 border-t border-[#e8dfd0]/80 pt-2" data-testid="onboarding-item-details">
+        <div className="space-y-2 border-t border-semantic-line/80 pt-2" data-testid="onboarding-item-details">
           {!compact ? (
             <p className="text-[11.5px] text-subtle/80">
               {reminded > 0
@@ -4194,7 +4115,7 @@ function OnboardingDetailPanel({
         )
       })}
       {availableTasks.length ? (
-        <div className="space-y-2 border-t border-[#e8dfd0] pt-3">
+        <div className="space-y-2 border-t border-semantic-line pt-3">
           <button
             type="button"
             className="flex w-full items-center justify-between rounded-lg px-1 py-1 text-start text-[12.5px] font-semibold text-subtle/90 hover:bg-[#f7f1e6]/70"
@@ -4727,8 +4648,8 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
                           if (emp.employee_key) rowRefs.current[emp.employee_key] = node
                         }}
                         className={cn(
-                          'rounded-[1.05rem] border bg-[#fffdf8] transition',
-                          isSelected ? 'border-[#23211d]/35 shadow-[0_1px_0_rgba(35,33,29,0.06)]' : 'border-[#e8dfd0]',
+                          'rounded-[1.05rem] border bg-semantic-surface-raised transition',
+                          isSelected ? 'border-semantic-ink/35 shadow-[0_1px_0_rgba(35,33,29,0.06)]' : 'border-semantic-line',
                         )}
                         data-testid="onboarding-row"
                         data-employee-key={emp.employee_key}
@@ -4976,7 +4897,7 @@ export function OnboardingPage({ access, permissions, role, onNotice, onAccessIs
                 locale={locale}
                 rescheduleSlot={
                   rescheduleFor === selectedEmp.employee_key && canMutate ? (
-                    <div className="flex flex-wrap items-end gap-2 rounded-[0.9rem] border border-[#e8dfd0] bg-[#fbf7f0] px-3.5 py-3">
+                    <div className="flex flex-wrap items-end gap-2 rounded-[0.9rem] border border-semantic-line bg-semantic-surface px-3.5 py-3">
                       <label className="flex flex-col gap-1 text-[12px] text-subtle/85">
                         {isAr ? 'تاريخ البدء' : 'Start date'}
                         <Input type="date" value={rescheduleDate} onChange={(e) => setRescheduleDate(e.target.value)} className="h-10 w-44" />
@@ -6615,7 +6536,7 @@ export function AnalyticsPage({
         <div className="min-w-0 max-w-2xl space-y-1">
           <p className="text-[13px] text-subtle/90">{copy.subtitle}</p>
           <div className="flex flex-wrap items-center gap-2" data-analytics-period>
-            <span className="rounded-full bg-[#f3ebe0] px-3 py-1 text-[12px] font-medium text-ink">
+            <span className="rounded-full bg-semantic-ink/[0.08] px-3 py-1 text-[12px] font-medium text-semantic-ink">
               {copy.period}: {rangeLabel}
             </span>
             <span
@@ -6653,7 +6574,7 @@ export function AnalyticsPage({
           ) : null}
 
           {partial || unavailable.length ? (
-            <div className="rounded-xl border border-dashed border-line/70 bg-[#fffaf0]/70 px-3.5 py-3 text-[13px] text-muted" data-analytics-partial>
+            <div className="rounded-xl border border-dashed border-semantic-line/70 bg-semantic-surface/70 px-3.5 py-3 text-[13px] text-muted" data-analytics-partial>
               <p className="font-medium text-ink">{copy.sourcesPartial}</p>
               <p className="mt-1 text-[12px]">
                 {unavailable
@@ -6695,7 +6616,7 @@ export function AnalyticsPage({
 
           {attention.length > 0 ? (
             <div
-              className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-[#f3ebe0]/70 px-3.5 py-2.5"
+              className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-semantic-ink/[0.06] px-3.5 py-2.5"
               data-analytics-triage-link
             >
               <p className="text-[12.5px] text-muted">
@@ -6751,7 +6672,7 @@ export function AnalyticsPage({
               {showMethodology ? copy.hideMethodology : copy.methodology}
             </button>
             {showMethodology ? (
-              <div className="space-y-3 rounded-[1.25rem] border border-dashed border-line/70 bg-[#fffaf0]/60 px-4 py-3">
+              <div className="space-y-3 rounded-[1.25rem] border border-dashed border-line/70 bg-semantic-surface/60 px-4 py-3">
                 <p className="text-[12px] text-muted">{copy.readOnlyShort}</p>
                 <p className="text-[12px] text-muted">{copy.compareNote}</p>
                 {definitions.length ? (
@@ -6793,8 +6714,8 @@ export function CompliancePage({
 }: PostHireCommonProps & Pick<PostHireProps, 'onNavigate'>) {
   const locale = useEmployees360Locale()
   const isAr = locale === 'ar'
-  const [surface, setSurface] = useState<'findings' | 'register'>('findings')
-  const [filter, setFilter] = useState<'all' | ComplianceBucket>('needs_review')
+  const [surface, setSurface] = useUrlBackedTab('compliance', URL_BACKED_WORKSPACE_TABS.compliance, 'findings')
+  const [filter, setFilter] = useUrlBackedTab('compliance', COMPLIANCE_FILTERS, 'needs_review', 'status')
   const [query, setQuery] = useState('')
   const [showMethodology, setShowMethodology] = useState(false)
   const [expandedFindingId, setExpandedFindingId] = useState<string | null>(null)
@@ -6843,7 +6764,7 @@ export function CompliancePage({
   const totalDocuments = data?.filtered_total ?? documents.length
   const searching = debouncedQuery.length > 0
 
-  const filterLabels: Array<{ key: 'all' | ComplianceBucket; label: string }> = [
+  const filterLabels: Array<{ key: (typeof COMPLIANCE_FILTERS)[number]; label: string }> = [
     { key: 'needs_review', label: isAr ? 'تحتاج مراجعة' : 'Needs review' },
     { key: 'missing', label: isAr ? 'ناقصة' : 'Missing' },
     { key: 'expiring_soon', label: isAr ? 'تنتهي قريباً' : 'Expiring' },
@@ -6969,17 +6890,21 @@ export function CompliancePage({
       </div>
 
       {loading ? (
-        <LoadingState />
+        <ResourceState kind="loading" locale={isAr ? 'ar' : 'en'} title={isAr ? 'جارٍ تحميل الامتثال' : 'Loading compliance'} />
       ) : error ? (
-        <ErrorState
-          message={error || (isAr ? 'تعذر تحميل الامتثال.' : 'We couldn’t load compliance.')}
+        <ResourceState
+          kind="error"
+          locale={isAr ? 'ar' : 'en'}
+          title={error || (isAr ? 'تعذر تحميل الامتثال.' : 'We couldn’t load compliance.')}
           onRetry={() => void reload()}
+          retrying={refreshing}
         />
       ) : !summary || summary.total_documents === 0 ? (
-        <EmptyState
-          icon={<FileText className="h-5 w-5" />}
+        <ResourceState
+          kind="empty"
+          locale={isAr ? 'ar' : 'en'}
           title={isAr ? 'لا مستندات امتثال متتبَّعة بعد' : 'No compliance documents tracked yet'}
-          hint={
+          detail={
             isAr
               ? 'يظهر الناقص والمنتهي هنا بعد رفع مستندات الموظفين. المراجعة ليست تحققاً حكومياً.'
               : 'Missing and expiring items surface here after employee documents are uploaded. HR review is not government verification.'
@@ -6998,59 +6923,39 @@ export function CompliancePage({
             </div>
           ) : null}
 
-          <div className="flex flex-wrap gap-2" data-compliance-surfaces role="tablist">
-            {(
-              [
-                ['findings', isAr ? 'النتائج' : 'Findings'],
-                ['register', isAr ? 'كل المستندات' : 'All documents'],
-              ] as const
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                role="tab"
-                aria-selected={surface === id}
-                data-surface={id}
-                className={`rounded-full px-3.5 py-1.5 text-sm font-medium ${
-                  surface === id ? 'bg-wf-ink text-white' : 'bg-[#f3ebe0] text-subtle'
-                }`}
-                onClick={() => setSurface(id)}
-              >
-                {label}
-              </button>
-            ))}
+          <div data-compliance-surfaces>
+            <HrSurfaceTabs
+              value={surface}
+              onChange={setSurface}
+              ariaLabel={isAr ? 'أسطح الامتثال' : 'Compliance surfaces'}
+              items={[
+                { id: 'findings', label: isAr ? 'النتائج' : 'Findings' },
+                { id: 'register', label: isAr ? 'كل المستندات' : 'All documents' },
+              ]}
+            />
           </div>
 
-          <div className="flex flex-wrap gap-2" data-compliance-filters>
-            {filterLabels.map((chip) => {
-              const count =
-                chip.key === 'all' ? summary.needs_attention : (summary[chip.key as ComplianceBucket] as number)
-              const activeChip = filter === chip.key
-              return (
-                <button
-                  key={chip.key}
-                  type="button"
-                  onClick={() => setFilter(chip.key)}
-                  className={cn(
-                    'rounded-full border px-3.5 py-1.5 text-[12.5px] font-medium transition',
-                    activeChip
-                      ? 'border-ink bg-ink text-white'
-                      : 'border-line/60 bg-white/60 text-subtle hover:border-[#c89445]/40 hover:text-ink',
-                  )}
-                >
-                  {chip.label} {count ? <span className="tabular-nums">({count})</span> : null}
-                </button>
-              )
-            })}
+          <div data-compliance-filters>
+            <HrSurfaceTabs
+              value={filter}
+              onChange={setFilter}
+              ariaLabel={isAr ? 'تصفية المستندات' : 'Document filters'}
+              items={filterLabels.map((chip) => ({
+                id: chip.key,
+                label: chip.label,
+                count: chip.key === 'all' ? summary.needs_attention : (summary[chip.key as ComplianceBucket] as number),
+              }))}
+            />
           </div>
 
           {surface === 'findings' ? (
             <section className="space-y-3" data-compliance-findings-list>
               {filteredFindings.length === 0 ? (
-                <EmptyState
-                  icon={<CheckCircle2 className="h-5 w-5" />}
+                <ResourceState
+                  kind="empty"
+                  locale={isAr ? 'ar' : 'en'}
                   title={isAr ? 'لا نتائج في هذا العرض' : 'No findings in this view'}
-                  hint={isAr ? 'جرّب تصفية أخرى أو افتح كل المستندات.' : 'Try another filter or open All documents.'}
+                  detail={isAr ? 'جرّب تصفية أخرى أو افتح كل المستندات.' : 'Try another filter or open All documents.'}
                 />
               ) : (
                 filteredFindings.map((item) => {
@@ -7309,7 +7214,7 @@ export function CompliancePage({
                             </tr>
                             {rowExpanded && doc.document_type ? (
                               <tr>
-                                <td colSpan={5} className="bg-[#fffaf0]/55 px-4 py-3">
+                                <td colSpan={5} className="bg-semantic-surface/55 px-4 py-3">
                                   <DocumentExtractionSummaryLoader
                                     access={access}
                                     employeeKey={doc.employee_key}
@@ -7355,7 +7260,7 @@ export function CompliancePage({
                   : 'Definitions & authority'}
             </button>
             {showMethodology ? (
-              <div className="space-y-3 rounded-[1.25rem] border border-dashed border-line/70 bg-[#fffaf0]/60 px-4 py-3 text-[12.5px] text-muted">
+              <div className="space-y-3 rounded-[1.25rem] border border-dashed border-line/70 bg-semantic-surface/60 px-4 py-3 text-[12.5px] text-muted">
                 <p>
                   {isAr
                     ? 'قراءة للمراجعة فقط · ليست تحققاً حكومياً · التنبيهات والتسليم تملك فشل التوصيل'

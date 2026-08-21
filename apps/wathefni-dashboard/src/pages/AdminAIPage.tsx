@@ -283,7 +283,7 @@ export function AdminAIPage({
                 <div
                   className={
                     message.role === 'user'
-                      ? 'ml-auto w-fit max-w-[60%] rounded-[1.35rem] bg-semantic-ink px-[18px] py-3 text-white shadow-[0_14px_34px_rgba(24,20,15,0.18)]'
+                      ? 'ms-auto w-fit max-w-[60%] rounded-[1.35rem] bg-semantic-ink px-[18px] py-3 text-white shadow-[0_14px_34px_rgba(24,20,15,0.18)]'
                       : 'flex max-w-5xl items-start gap-3'
                   }
                   key={message.id}
@@ -314,7 +314,7 @@ export function AdminAIPage({
                       <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                         {message.candidateCards.map((card) => (
                           <button
-                            className="group rounded-3xl border border-white/70 bg-white/55 p-5 text-left shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_14px_34px_rgba(24,20,15,0.055)] backdrop-blur transition duration-200 hover:-translate-y-1 hover:bg-panel/90 hover:shadow-[0_18px_46px_rgba(24,20,15,0.09)]"
+                            className="group rounded-3xl border border-white/70 bg-white/55 p-5 text-left shadow-[0_1px_0_rgba(255,255,255,0.8)_inset,0_14px_34px_rgba(24,20,15,0.055)] backdrop-blur transition-colors duration-200 hover:bg-panel/90"
                             key={card.app_key || card.phone || card.name}
                             onClick={() => {
                               dashboardPerfMarkInteractionStart('assistant_open_candidate', {
@@ -459,7 +459,7 @@ export function AdminAIPage({
                 {busy && onCancel ? (
                   <button
                     aria-label={assistantCopy(locale, 'stop')}
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-ink/20 bg-white text-ink transition hover:-translate-y-0.5 hover:shadow-soft"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-ink/20 bg-white text-ink transition-colors hover:bg-panel"
                     onClick={onCancel}
                     type="button"
                   >
@@ -468,7 +468,7 @@ export function AdminAIPage({
                 ) : (
                   <button
                     aria-label="Send message"
-                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-ink bg-ink text-white transition hover:-translate-y-0.5 hover:shadow-soft disabled:border-line disabled:bg-panel disabled:text-mist"
+                    className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-ink bg-ink text-white transition-colors hover:bg-ink/90 disabled:border-line disabled:bg-panel disabled:text-mist"
                     disabled={busy || !input.trim()}
                     type="submit"
                   >
@@ -484,7 +484,7 @@ export function AdminAIPage({
         <div className="fixed inset-0 z-40 bg-ink/20 backdrop-blur-[2px]" onClick={onCloseHistory}>
           <aside
             aria-modal="true"
-            className="ml-auto flex h-full w-full max-w-md flex-col border-l border-white/70 bg-panel/95 p-6 shadow-[0_24px_80px_rgba(24,20,15,0.18)] backdrop-blur-2xl"
+            className="ms-auto flex h-full w-full max-w-md flex-col border-s border-white/70 bg-panel/95 p-6 shadow-[0_24px_80px_rgba(24,20,15,0.18)] backdrop-blur-2xl"
             dir={isAr ? 'rtl' : 'ltr'}
             onClick={(event) => event.stopPropagation()}
             ref={historyRef}

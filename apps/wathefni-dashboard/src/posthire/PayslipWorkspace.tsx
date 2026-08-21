@@ -19,6 +19,7 @@ import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { FRESHNESS_MS } from '@/lib/query/freshness'
 import { useVisibilitySoftPoll } from '@/lib/query/useVisibilitySoftPoll'
 import { BlockedReason, useEmployees360Locale, WorkflowEmpty } from '@/posthire/employees360/chrome'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import {
   payrollPayslipCopy,
   payslipEmployeeVisibilityLabel,
@@ -190,22 +191,14 @@ export function PayslipWorkspace({ access, permissions, onNotice, onAccessIssue 
       ) : null}
       <p className="text-[12px] text-subtle md:hidden">{c.mobileHint}</p>
 
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          className={`rounded-full px-3 py-1.5 text-[13px] font-medium ${tab === 'list' ? 'bg-wf-ink text-white' : 'bg-[#f3ebe0] text-subtle'}`}
-          onClick={() => setTab('list')}
-        >
-          {c.tabList}
-        </button>
-        <button
-          type="button"
-          className={`rounded-full px-3 py-1.5 text-[13px] font-medium ${tab === 'history' ? 'bg-wf-ink text-white' : 'bg-[#f3ebe0] text-subtle'}`}
-          onClick={() => setTab('history')}
-        >
-          {c.tabHistory}
-        </button>
-      </div>
+      <HrSurfaceTabs
+        value={tab}
+        onChange={setTab}
+        items={[
+          { id: 'list', label: c.tabList },
+          { id: 'history', label: c.tabHistory },
+        ]}
+      />
 
       {canManage ? (
         <div className="grid gap-3 rounded-xl border border-line/70 bg-white/80 p-4 md:grid-cols-2">

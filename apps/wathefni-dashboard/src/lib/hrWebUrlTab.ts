@@ -38,6 +38,7 @@ export const URL_BACKED_WORKSPACE_TABS = {
   requisitions: ['attention', 'draft', 'pending_approval', 'approved', 'open', 'filled'],
   calendar: ['day', 'week', 'month'],
   notifications: ['needs_follow_up', 'failed', 'retrying', 'resolved', 'all'],
+  compliance: ['findings', 'register'],
 } as const
 
 export const URL_BACKED_VIEW_PAGES = {
@@ -50,6 +51,8 @@ export const EMPLOYEE_STATUS_FILTERS = ['active', 'left', 'all'] as const
 export const EMPLOYEE_ONBOARDING_FILTERS = ['any', 'open', 'complete', 'not_started'] as const
 
 export const LEAVE_HISTORY_STATUSES = ['', 'approved', 'rejected', 'cancelled', 'withdrawn', 'requested'] as const
+
+export const COMPLIANCE_FILTERS = ['needs_review', 'missing', 'expiring_soon', 'expired', 'all'] as const
 
 export type UrlBackedQueryKey =
   | 'tab'

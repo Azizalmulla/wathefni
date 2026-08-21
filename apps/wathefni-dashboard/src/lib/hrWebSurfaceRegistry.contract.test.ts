@@ -102,4 +102,13 @@ describe('HR Web Surface Registry coverage contract', () => {
       expect(families.has(family), family).toBe(true)
     }
   })
+
+  test('every surface has split inventory/ux fields and no unexplained leftover chrome', () => {
+    for (const row of HR_WEB_SURFACE_REGISTRY) {
+      expect(row.inventory_status, row.surface_id).toBeTruthy()
+      expect(row.ux_migration_status, row.surface_id).toBeTruthy()
+      expect(row).toHaveProperty('ux_phase')
+      expect(['partial', 'missed']).not.toContain(row.ux_migration_status)
+    }
+  })
 })

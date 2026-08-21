@@ -23,6 +23,7 @@ import {
   postExternalPayrollRollback,
 } from '@/lib/api'
 import { cn } from '@/lib/utils'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { BlockedReason, useEmployees360Locale, WorkflowEmpty } from '@/posthire/employees360/chrome'
 import {
   importRunLabel,
@@ -401,31 +402,24 @@ export function ExternalPayrollWorkspace({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap gap-2" data-payroll-run-panels>
-        {(
-          [
-            ['overview', c.tabOverview],
-            ['exports', c.tabExports],
-            ['quarantine', c.tabQuarantine],
-            ['history', c.tabHistory],
-            ['help', c.tabHelp],
-          ] as const
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            className={cn(
-              'rounded-full px-3 py-1.5 text-[13px] font-medium',
-              tab === id ? 'bg-wf-ink text-white' : 'bg-[#f3ebe0] text-subtle',
-            )}
-            onClick={() => setTab(id)}
-          >
-            {label}
-            {id === 'quarantine' && openQuarantineCount ? (
-              <span className="ms-1.5 text-[11px] opacity-80">{openQuarantineCount}</span>
-            ) : null}
-          </button>
-        ))}
+      <div data-payroll-run-panels>
+        <HrSurfaceTabs
+          value={tab}
+          onChange={setTab}
+          items={(
+            [
+              ['overview', c.tabOverview],
+              ['exports', c.tabExports],
+              ['quarantine', c.tabQuarantine],
+              ['history', c.tabHistory],
+              ['help', c.tabHelp],
+            ] as const
+          ).map(([id, label]) => ({
+            id,
+            label,
+            count: id === 'quarantine' ? openQuarantineCount : undefined,
+          }))}
+        />
       </div>
 
       <div className="space-y-2">

@@ -29,7 +29,7 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
     component: 'App.tsx page header + PageIntro',
     path: 'src/App.tsx + src/components/ui/page-chrome.tsx',
     disposition: 'consolidate',
-    notes: 'Overview uses HrPageHeader as the reference. Operational core, People spine, Phase 6 enterprise, Phase 7 recruiting, and Phase 8 Settings / Alerts / Activity use density=page (chat/calendar use compact hero) via usesCanonicalPageHeader. Palette is not frozen.',
+    notes: 'Overview uses HrPageHeader as the reference. Operational core, People spine (including Compliance), Phase 6 enterprise, Phase 7 recruiting, and Phase 8 Settings / Alerts / Activity use density=page (chat/calendar use compact hero) via usesCanonicalPageHeader. Palette is not frozen.',
   },
   {
     id: 'actions.button',
@@ -42,10 +42,10 @@ export const HR_WEB_UX_INVENTORY: UxInventoryRow[] = [
   {
     id: 'actions.confirm',
     family: 'drawers/modals',
-    component: 'ConfirmDialog vs PostHire ConfirmDialog',
-    path: 'src/components/ConfirmDialog.tsx + src/posthire/PostHire.tsx',
-    disposition: 'consolidate',
-    notes: 'Two confirm overlays. Keep the shared ConfirmProvider; delete the PostHire-local copy in a later wave.',
+    component: 'ConfirmDialog (shared ConfirmProvider)',
+    path: 'src/components/ConfirmDialog.tsx',
+    disposition: 'preserve',
+    notes: 'Single shared overlay. PostHire local ConfirmDialog removed in Phase 8.5.',
   },
   {
     id: 'tabs.prehire',

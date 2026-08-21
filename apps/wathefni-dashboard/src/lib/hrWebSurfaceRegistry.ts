@@ -46,6 +46,20 @@ export type MigrationStatus =
   | 'enterprise'
   | 'excluded'
 
+/** Inventory class — what this surface is in the product map. */
+export type InventoryStatus = 'live' | 'alias' | 'adjacent_setup' | 'preauth' | 'excluded'
+
+/** UX overhaul migration class — independent of inventory. */
+export type UxMigrationStatus =
+  | 'migrated'
+  | 'preserved_specialist'
+  | 'preserved_overlay'
+  | 'partial'
+  | 'missed'
+  | 'n_a'
+
+export type UxPhase = 3 | 4 | 5 | 6 | 7 | 8 | 8.5 | null
+
 export type HrWebSurface = {
   surface_id: string
   kind: SurfaceKind
@@ -69,6 +83,9 @@ export type HrWebSurface = {
   in_page_union: boolean
   in_capability: boolean
   migration_status: MigrationStatus
+  inventory_status: InventoryStatus
+  ux_migration_status: UxMigrationStatus
+  ux_phase: UxPhase
   notes?: string
 }
 
@@ -126,7 +143,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
-    notes: 'Phase 7 recruiting. Openings inventory with status tiles. Search and status are URL-backed. Distinct from job architecture.',
+    notes: 'Phase 7 recruiting. Openings inventory with status tiles. Search, status, and selected position (`position_code`) are URL-backed. Distinct from job architecture.',
   },
   {
     page: 'requisitions',
@@ -440,7 +457,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
-    notes: 'Phase 6 UX migrated. Governed KPI evaluate/trend/segment/drill remain backend. Freshness, suppression, and drill authority are not recomputed in the UI. Metric detail via `?q={semantic_key}`.',
+    notes: 'Phase 6 UX migrated. Governed KPI evaluate/trend/segment/drill remain backend. Freshness, suppression, and drill authority are not recomputed in the UI. Metric detail via `?q={semantic_key}`. AnalyticsPage remains the entitlement/kill-switch fallback when C6 intelligence surfaces are off — not a second production path.',
   },
   {
     page: 'compliance',
@@ -451,6 +468,7 @@ const PAGE_DEFS: PageDef[] = [
     in_sidebar: true,
     in_capability: true,
     migration_status: 'canonical',
+    notes: 'Phase 8.5. Findings / All documents via `?tab=`; bucket via `?status=`. Document requirements stay in Setup Console. Review and reminder mutations stay backend-governed.',
   },
   {
     page: 'activity',
@@ -477,7 +495,83 @@ const PAGE_DEFS: PageDef[] = [
   },
 ]
 
+const PAGE_UX_PHASE: Partial<Record<Page, UxPhase>> = {
+  overview: 3,
+  leave: 4,
+  attendance: 4,
+  shifts: 4,
+  payroll: 4,
+  employees: 5,
+  workforce: 5,
+  onboarding: 5,
+  preboarding: 5,
+  probation: 5,
+  inbox: 5,
+  performance: 6,
+  talent: 6,
+  learning: 6,
+  benefits: 6,
+  'employee-relations': 6,
+  engagement: 6,
+  'compensation-planning': 6,
+  'workforce-planning': 6,
+  'job-architecture': 6,
+  analytics: 6,
+  jobs: 7,
+  requisitions: 7,
+  candidates: 7,
+  interviews: 7,
+  calendar: 7,
+  assessments: 7,
+  ranking: 7,
+  reports: 7,
+  ai: 7,
+  settings: 8,
+  notifications: 8,
+  activity: 8,
+  compliance: 8.5,
+}
+
+function deriveSplit(args: {
+  migration_status: MigrationStatus
+  kind: SurfaceKind
+  page?: string | null
+  notes?: string
+}): { inventory_status: InventoryStatus; ux_migration_status: UxMigrationStatus; ux_phase: UxPhase } {
+  const pagePhase = args.page ? PAGE_UX_PHASE[args.page as Page] ?? null : null
+  if (args.migration_status === 'legacy_alias') {
+    return { inventory_status: 'alias', ux_migration_status: 'n_a', ux_phase: null }
+  }
+  if (args.migration_status === 'excluded' && args.kind === 'auth') {
+    return { inventory_status: 'preauth', ux_migration_status: 'n_a', ux_phase: null }
+  }
+  if (args.migration_status === 'excluded') {
+    return { inventory_status: 'excluded', ux_migration_status: 'n_a', ux_phase: null }
+  }
+  if (args.kind === 'setup') {
+    return { inventory_status: 'adjacent_setup', ux_migration_status: 'n_a', ux_phase: null }
+  }
+  if (args.migration_status === 'preserve') {
+    const overlay = args.kind === 'modal' || args.kind === 'drawer'
+    return {
+      inventory_status: 'live',
+      ux_migration_status: overlay ? 'preserved_overlay' : 'preserved_specialist',
+      ux_phase: pagePhase,
+    }
+  }
+  if (args.migration_status === 'consolidate') {
+    return { inventory_status: 'live', ux_migration_status: 'migrated', ux_phase: pagePhase ?? 8.5 }
+  }
+  return { inventory_status: 'live', ux_migration_status: 'migrated', ux_phase: pagePhase }
+}
+
 function pageSurface(def: PageDef): HrWebSurface {
+  const split = deriveSplit({
+    migration_status: def.in_sidebar ? def.migration_status : 'broken_deeplink',
+    kind: 'page',
+    page: def.page,
+    notes: def.notes,
+  })
   return {
     surface_id: `page.${def.page}`,
     kind: 'page',
@@ -500,6 +594,9 @@ function pageSurface(def: PageDef): HrWebSurface {
     in_page_union: true,
     in_capability: def.in_capability,
     migration_status: def.in_sidebar ? def.migration_status : 'broken_deeplink',
+    inventory_status: split.inventory_status,
+    ux_migration_status: split.ux_migration_status,
+    ux_phase: split.ux_phase,
     notes: def.notes,
   }
 }
@@ -507,8 +604,8 @@ function pageSurface(def: PageDef): HrWebSurface {
 function nested(args: {
   id: string
   kind: SurfaceKind
-  parent: string
-  page: string
+  parent: string | null
+  page: string | null
   route: string
   module: string | null
   permission: string | null
@@ -516,11 +613,20 @@ function nested(args: {
   api_authority: string
   url_state: UrlStateKind
   migration_status: MigrationStatus
+  inventory_status?: InventoryStatus
+  ux_migration_status?: UxMigrationStatus
+  ux_phase?: UxPhase
   notes?: string
   loading?: boolean
   error?: boolean
   empty?: boolean
 }): HrWebSurface {
+  const split = deriveSplit({
+    migration_status: args.migration_status,
+    kind: args.kind,
+    page: args.page,
+    notes: args.notes,
+  })
   return {
     surface_id: args.id,
     kind: args.kind,
@@ -542,6 +648,9 @@ function nested(args: {
     in_page_union: false,
     in_capability: false,
     migration_status: args.migration_status,
+    inventory_status: args.inventory_status ?? split.inventory_status,
+    ux_migration_status: args.ux_migration_status ?? split.ux_migration_status,
+    ux_phase: args.ux_phase ?? split.ux_phase,
     notes: args.notes,
   }
 }
@@ -580,6 +689,7 @@ const WORKSPACE_TABS: Record<string, string[]> = {
   requisitions: ['attention', 'draft', 'pending_approval', 'approved', 'open', 'filled'],
   calendar: ['day', 'week', 'month'],
   notifications: ['needs_follow_up', 'failed', 'retrying', 'resolved', 'all'],
+  compliance: ['findings', 'register'],
 }
 
 const NESTED: HrWebSurface[] = [
@@ -656,14 +766,14 @@ const NESTED: HrWebSurface[] = [
     kind: 'detail',
     parent: 'page.jobs',
     page: 'jobs',
-    route: '/dashboard?page=jobs (selected position)',
+    route: '/dashboard?page=jobs&position_code={code}',
     module: 'pre_hiring',
     permission: 'jobs.read',
     component: 'JobWorkspace',
     api_authority: '/dashboard/prehire/positions/{code}',
     url_state: 'query',
     migration_status: 'canonical',
-    notes: 'Selected job is not a first-class URL key.',
+    notes: 'Phase 8.5. Selected position is URL-backed via `position_code`. Distinct from Jobs search `q`.',
   }),
   nested({
     id: 'drawer.interviews.detail',
@@ -829,11 +939,13 @@ const NESTED: HrWebSurface[] = [
     route: '(overlay)',
     module: null,
     permission: null,
-    component: 'ConfirmDialog (shared) + PostHire local ConfirmDialog',
+    component: 'ConfirmDialog (shared ConfirmProvider)',
     api_authority: 'mutation endpoints of caller',
     url_state: 'local',
-    migration_status: 'consolidate',
-    notes: 'PostHire.tsx ships a second ConfirmDialog. Keep one shared overlay.',
+    migration_status: 'preserve',
+    ux_migration_status: 'preserved_overlay',
+    ux_phase: 8.5,
+    notes: 'Single shared overlay. PostHire local ConfirmDialog removed in Phase 8.5. Callers still use backend confirmation text.',
   }),
   nested({
     id: 'modal.payroll.export-detail',
@@ -873,7 +985,24 @@ const NESTED: HrWebSurface[] = [
     api_authority: '/dashboard/posthire/attendance/capture',
     url_state: 'query',
     migration_status: 'canonical',
-    notes: 'connectors | mapping | missing | conflicts — local tab state behind collapsed Operations. Not URL-backed on purpose.',
+    notes: 'Phase 8.5. connectors | mapping | missing | conflicts — local tab state behind collapsed Operations. Chrome uses HrSurfaceTabs. Not URL-backed on purpose.',
+  }),
+  nested({
+    id: 'fallback.analytics.legacy',
+    kind: 'legacy',
+    parent: 'page.analytics',
+    page: 'analytics',
+    route: '/dashboard?page=analytics',
+    module: 'analytics',
+    permission: 'analytics.read',
+    component: 'AnalyticsPage',
+    api_authority: '/dashboard/posthire/analytics',
+    url_state: 'page',
+    migration_status: 'preserve',
+    ux_migration_status: 'preserved_overlay',
+    ux_phase: 8.5,
+    notes:
+      'Kept as required resilience when C6 intelligence surfaces / company entitlement is off. Governed Intelligence is the qualified production path. Not a second KPI authority.',
   }),
   nested({
     id: 'tab.leave.active',
@@ -1224,7 +1353,8 @@ for (const [page, tabs] of Object.entries(WORKSPACE_TABS)) {
           page === 'requisitions' ||
           page === 'calendar' ||
           page === 'notifications' ||
-          page === 'settings'
+          page === 'settings' ||
+          page === 'compliance'
             ? 'canonical'
             : 'enterprise',
         notes:
@@ -1252,10 +1382,32 @@ for (const [page, tabs] of Object.entries(WORKSPACE_TABS)) {
                   ? 'Phase 8 workspace. Delivery issue filter is URL-backed via ?tab=. Refresh/back/forward restore the same chrome. Channel/delivery authority stays backend-canonical.'
                 : page === 'settings'
                   ? 'Phase 8 workspace. Settings section is URL-backed via ?tab=. Configuration semantics unchanged.'
+                : page === 'compliance'
+                  ? 'Phase 8.5. Findings / All documents is URL-backed via ?tab=. Review and reminder mutations stay backend-governed.'
                 : 'Workspace tab is URL-backed via ?tab=. Refresh/back/forward restore the same chrome.',
       }),
     )
   }
+}
+
+const COMPLIANCE_FILTERS = ['needs_review', 'missing', 'expiring_soon', 'expired', 'all'] as const
+for (const bucket of COMPLIANCE_FILTERS) {
+  NESTED.push(
+    nested({
+      id: `tab.compliance.filter.${bucket}`,
+      kind: 'subtab',
+      parent: 'page.compliance',
+      page: 'compliance',
+      route: `/dashboard?page=compliance&status=${bucket}`,
+      module: 'compliance',
+      permission: 'compliance.read',
+      component: 'CompliancePage',
+      api_authority: '/dashboard/posthire/compliance',
+      url_state: 'query',
+      migration_status: 'canonical',
+      notes: 'Phase 8.5. Findings bucket is URL-backed via ?status=. Counts come from backend summary — the UI does not invent them.',
+    }),
+  )
 }
 
 export const HR_WEB_SURFACE_REGISTRY: HrWebSurface[] = [...PAGE_DEFS.map(pageSurface), ...NESTED]

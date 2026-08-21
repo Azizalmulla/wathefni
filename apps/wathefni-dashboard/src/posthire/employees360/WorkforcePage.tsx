@@ -454,8 +454,8 @@ function OrganizationPanel({
 
   const filterChipClass = (active: boolean) =>
     cn(
-      'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition',
-      active ? 'bg-[#23211d] text-white' : 'bg-[#eee5d4]/80 text-[#5c554a] hover:bg-[#eee5d4]',
+      'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition-colors duration-150',
+      active ? 'bg-semantic-ink text-white' : 'bg-semantic-ink/[0.08] text-semantic-subtle hover:text-semantic-ink',
     )
 
   const overview = (
@@ -470,8 +470,8 @@ function OrganizationPanel({
           key={item.key}
           type="button"
           className={cn(
-            'rounded-full border border-[#e8dfd0]/80 bg-white/55 px-3.5 py-1.5 text-start transition hover:bg-white/80',
-            typeFilter === item.key && 'border-[#23211d]/30 bg-[#eee5d4]',
+            'rounded-full border border-semantic-line/80 bg-semantic-surface-raised/55 px-3.5 py-1.5 text-start transition hover:bg-semantic-surface-raised/80',
+            typeFilter === item.key && 'border-semantic-ink/30 bg-semantic-ink/[0.08]',
           )}
           onClick={() => setTypeFilter((prev) => (prev === item.key ? 'all' : (item.key as UnitTypeFilter)))}
         >
@@ -483,8 +483,8 @@ function OrganizationPanel({
         <button
           type="button"
           className={cn(
-            'rounded-full border border-[#e8dfd0]/80 bg-white/55 px-3.5 py-1.5 text-start transition hover:bg-white/80',
-            typeFilter === 'other' && 'border-[#23211d]/30 bg-[#eee5d4]',
+            'rounded-full border border-semantic-line/80 bg-semantic-surface-raised/55 px-3.5 py-1.5 text-start transition hover:bg-semantic-surface-raised/80',
+            typeFilter === 'other' && 'border-semantic-ink/30 bg-semantic-ink/[0.08]',
           )}
           onClick={() => setTypeFilter((prev) => (prev === 'other' ? 'all' : 'other'))}
         >
@@ -576,7 +576,7 @@ function OrganizationPanel({
                 return (
                   <div
                     key={u.org_unit_id}
-                    className="rounded-[1.15rem] border border-[#e8dfd0]/80 bg-white/55 px-3.5 py-3"
+                    className="rounded-[1.15rem] border border-semantic-line/80 bg-white/55 px-3.5 py-3"
                     style={{ marginInlineStart: Math.min(depth, 3) * 12 }}
                   >
                     <div className="flex flex-wrap items-center gap-2">
@@ -597,7 +597,7 @@ function OrganizationPanel({
               })}
             </div>
 
-            <div className="hidden overflow-x-auto rounded-[1.1rem] border border-[#e8dfd0]/80 md:block" data-testid="organization-desktop-table">
+            <div className="hidden overflow-x-auto rounded-[1.1rem] border border-semantic-line/80 md:block" data-testid="organization-desktop-table">
               <table className="w-full min-w-[560px] text-start text-[13px]">
                 <thead className="bg-[#f7f1e6] text-[11px] uppercase tracking-[0.06em] text-subtle/80">
                   <tr>
@@ -607,7 +607,7 @@ function OrganizationPanel({
                     <th className="px-4 py-2.5 font-medium">{isAr ? 'الحالة' : 'Status'}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#e8dfd0]/70">
+                <tbody className="divide-y divide-semantic-line/70">
                   {structureRows.map(({ unit: u, depth }) => {
                     const parent = u.parent_org_unit_id ? byId.get(u.parent_org_unit_id) : null
                     return (
@@ -637,7 +637,7 @@ function OrganizationPanel({
         )}
 
         {canManage && !disabled ? (
-          <div className="rounded-[1.15rem] border border-[#e8dfd0]/80 bg-[#f7f1e6]/45 px-4 py-3" data-testid="organization-coverage">
+          <div className="rounded-[1.15rem] border border-semantic-line/80 bg-semantic-surface/45 px-4 py-3" data-testid="organization-coverage">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="text-[13px] font-semibold text-text">{isAr ? 'تغطية التعيين' : 'Assignment coverage'}</p>
@@ -914,7 +914,7 @@ function RemediationPanel({
       ) : rows.length === 0 ? (
         <WorkflowEmpty icon={<ShieldAlert className="h-5 w-5" />} title={isAr ? 'القائمة فارغة' : 'Remediation queue is clear'} />
       ) : (
-        <div className="overflow-x-auto rounded-[var(--radius-wf-panel)] border border-[#e8dfd0] bg-wf-surface">
+        <div className="overflow-x-auto rounded-[var(--radius-wf-panel)] border border-semantic-line bg-wf-surface">
           <table className="w-full min-w-[640px] text-left text-[13px]">
             <thead className="bg-[#f7f1e6] text-[11px] uppercase tracking-[0.06em] text-subtle/80">
               <tr>
@@ -924,7 +924,7 @@ function RemediationPanel({
                 <th className="px-4 py-2.5 font-medium">Next</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e8dfd0]/70">
+            <tbody className="divide-y divide-semantic-line/70">
               {rows.map((r) => (
                 <tr key={r.employment_id}>
                   <td className="px-4 py-3">

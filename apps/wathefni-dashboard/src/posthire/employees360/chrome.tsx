@@ -1,5 +1,6 @@
 import { type HTMLAttributes, type ReactNode } from 'react'
 
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { StatusPill } from '@/components/ui/page-chrome'
 import { readStoredRecruitingLocale } from '@/lib/dashboardLocale'
 import { cn } from '@/lib/utils'
@@ -78,7 +79,7 @@ export function ApprovalStrip({
   return (
     <div
       className={cn(
-        'flex flex-wrap items-center gap-2 rounded-[1rem] border border-[#e8dfd0] bg-[#fffdf8] px-3 py-2 text-[13px]',
+        'flex flex-wrap items-center gap-2 rounded-[1rem] border border-semantic-line bg-semantic-surface-raised px-3 py-2 text-[13px]',
         className,
       )}
       dir={isAr ? 'rtl' : 'ltr'}
@@ -121,7 +122,7 @@ export function ConflictBanner({
   const isAr = locale === 'ar'
   return (
     <div
-      className={cn('rounded-[1.1rem] border border-[#e8c9a0] bg-wf-accent-review-soft/70 px-4 py-3', className)}
+      className={cn('rounded-[1.1rem] border border-semantic-warning/40 bg-semantic-warning/15 px-4 py-3', className)}
       dir={isAr ? 'rtl' : 'ltr'}
       role="alert"
     >
@@ -170,7 +171,7 @@ export function WorkflowEmpty({
   className?: string
 }) {
   return (
-    <div className={cn('flex flex-col items-center justify-center gap-2 rounded-[var(--radius-wf-panel)] border border-dashed border-[#e8dfd0] bg-[#fffdf8]/70 px-6 py-12 text-center', className)}>
+    <div className={cn('flex flex-col items-center justify-center gap-2 rounded-[var(--radius-wf-panel)] border border-dashed border-semantic-line bg-semantic-surface-raised/70 px-6 py-12 text-center', className)}>
       {icon ? <div className="text-mist">{icon}</div> : null}
       <p className="text-[15px] font-semibold tracking-[-0.02em] text-text">{title}</p>
       {hint ? <p className="max-w-md text-[13px] leading-5 text-subtle/90">{hint}</p> : null}
@@ -194,26 +195,16 @@ export function WorkforceSectionRail({
 }) {
   const isAr = locale === 'ar'
   return (
-    <div className={cn('flex flex-wrap gap-1.5', className)} role="tablist" dir={isAr ? 'rtl' : 'ltr'}>
-      {sections.map((s) => {
-        const selected = s.id === active
-        return (
-          <button
-            key={s.id}
-            type="button"
-            role="tab"
-            aria-selected={selected}
-            onClick={() => onChange(s.id)}
-            className={cn(
-              'rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold tracking-[-0.01em] transition',
-              selected ? 'bg-[#23211d] text-white' : 'bg-[#eee5d4]/80 text-[#5c554a] hover:bg-[#eee5d4]',
-            )}
-          >
-            {isAr ? s.labelAr : s.labelEn}
-          </button>
-        )
-      })}
-    </div>
+    <HrSurfaceTabs
+      value={active}
+      onChange={onChange}
+      className={className}
+      ariaLabel={isAr ? 'أقسام الهيكل' : 'Organization sections'}
+      items={sections.map((s) => ({
+        id: s.id,
+        label: isAr ? s.labelAr : s.labelEn,
+      }))}
+    />
   )
 }
 
@@ -225,7 +216,7 @@ export function QuietStat({
   ...props
 }: HTMLAttributes<HTMLDivElement> & { label: string; value: string | number; hint?: string }) {
   return (
-    <div className={cn('rounded-[1.1rem] border border-[#e8dfd0]/80 bg-wf-surface px-4 py-3', className)} {...props}>
+    <div className={cn('rounded-[1.1rem] border border-semantic-line/80 bg-semantic-surface px-4 py-3', className)} {...props}>
       <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-mist">{label}</div>
       <div className="mt-1 text-2xl font-semibold tracking-[-0.03em] text-text">{value}</div>
       {hint ? <div className="mt-0.5 text-[12px] text-subtle/85">{hint}</div> : null}

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/field'
 import { StatusPill } from '@/components/ui/page-chrome'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { useConfirm } from '@/components/ConfirmDialog'
 import {
   applyAttendanceOpsCase,
@@ -272,7 +273,7 @@ export function AttendanceOpsPanel({
   const isAr = locale === 'ar'
   const confirm = useConfirm()
   const actorPhone = (access.hrPhone || '').replace(/\D/g, '')
-  const [tab, setTab] = useState('queue')
+  const [tab, setTab] = useState<'queue' | 'corrections' | 'disputes' | 'locked'>('queue')
   const [exceptions, setExceptions] = useState<OpsException[]>([])
   const [cases, setCases] = useState<OpsCase[]>([])
   const [disputes, setDisputes] = useState<OpsDispute[]>([])
@@ -583,7 +584,7 @@ export function AttendanceOpsPanel({
 
   return (
     <div className="space-y-3" data-testid="attendance-ops" data-compact={compact ? '1' : '0'} dir={isAr ? 'rtl' : 'ltr'} ref={rootRef}>
-      <Card className="border-[#e8dfd0] bg-[#fffdf8]" tone="board">
+      <Card className="border-semantic-line bg-semantic-surface-raised" tone="board">
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <CardTitle className="text-[17px] tracking-[-0.02em]">{compact ? t.title : t.fullTitle}</CardTitle>
@@ -617,28 +618,18 @@ export function AttendanceOpsPanel({
                   <QuietStat label={t.locked} value={lockedish.length} />
                 </div>
               ) : null}
-              <div className="flex flex-wrap gap-1.5" data-testid="attendance-exception-filters" role="tablist">
-                {(
-                  [
-                    ['queue', t.queue, openish.length],
-                    ['corrections', t.corrections, activeCases.length],
-                    ['disputes', t.disputes, openDisputes.length],
-                    ['locked', t.locked, lockedish.length],
-                  ] as const
-                ).map(([id, label, count]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setTab(id)}
-                    className={cn(
-                      'rounded-full px-3 py-1.5 text-[12.5px] font-semibold transition',
-                      tab === id ? 'bg-[#23211d] text-white' : 'bg-[#eee5d4]/80 text-[#5c554a] hover:bg-[#eee5d4]',
-                    )}
-                  >
-                    {label}
-                    <span className="ms-1.5 tabular-nums opacity-80">{count}</span>
-                  </button>
-                ))}
+              <div data-testid="attendance-exception-filters">
+                <HrSurfaceTabs
+                  value={tab}
+                  onChange={setTab}
+                  ariaLabel={t.queue}
+                  items={[
+                    { id: 'queue', label: t.queue, count: openish.length },
+                    { id: 'corrections', label: t.corrections, count: activeCases.length },
+                    { id: 'disputes', label: t.disputes, count: openDisputes.length },
+                    { id: 'locked', label: t.locked, count: lockedish.length },
+                  ]}
+                />
               </div>
 
               {tab === 'queue' ? (
@@ -668,7 +659,7 @@ export function AttendanceOpsPanel({
                             data-exception-id={exc.exception_id}
                             className={cn(
                               'rounded-[1.1rem] border px-3.5 py-3 transition',
-                              active ? 'border-[#23211d]/35 bg-white shadow-[0_1px_0_rgba(35,33,29,0.06)]' : 'border-[#e8dfd0] bg-[#fffdf8]/60',
+                              active ? 'border-semantic-ink/35 bg-white shadow-[0_1px_0_rgba(35,33,29,0.06)]' : 'border-semantic-line bg-semantic-surface-raised/60',
                             )}
                           >
                             <button
@@ -735,7 +726,7 @@ export function AttendanceOpsPanel({
                       })}
                     </div>
                     {selected && selectedId === selected.exception_id ? (
-                      <div className="space-y-3 rounded-[1.2rem] border border-[#e8dfd0] bg-white p-4 lg:sticky lg:top-4">
+                      <div className="space-y-3 rounded-[1.2rem] border border-semantic-line bg-white p-4 lg:sticky lg:top-4">
                         <div className="flex items-start gap-2">
                           <UserRound className="mt-0.5 h-4 w-4 text-mist" />
                           <div>
@@ -777,7 +768,7 @@ export function AttendanceOpsPanel({
                             {t.requestFix}
                           </Button>
                         </div>
-                        <div className="space-y-2 border-t border-[#e8dfd0] pt-3">
+                        <div className="space-y-2 border-t border-semantic-line pt-3">
                           <label className="text-[12px] font-medium text-subtle">
                             {locale === 'ar' ? 'سبب النزاع' : 'Dispute reason'}
                             <Input value={disputeReason} onChange={(e) => setDisputeReason(e.target.value)} className="mt-1 h-10" />
@@ -787,7 +778,7 @@ export function AttendanceOpsPanel({
                           </Button>
                         </div>
                         {['resolved', 'rejected', 'closed'].includes(selected.status) ? (
-                          <div className="space-y-2 border-t border-[#e8dfd0] pt-3">
+                          <div className="space-y-2 border-t border-semantic-line pt-3">
                             <label className="text-[12px] font-medium text-subtle">
                               {t.evidence}
                               <Input value={evidence} onChange={(e) => setEvidence(e.target.value)} className="mt-1 h-10" placeholder={t.evidence} />
@@ -810,7 +801,7 @@ export function AttendanceOpsPanel({
                   <div className="space-y-3">
                     <p className="text-[12px] text-subtle/90">{t.applyHint}</p>
                     {cases.slice(0, 40).map((c) => (
-                      <div key={c.case_id} className="rounded-[1.1rem] border border-[#e8dfd0] bg-white p-4">
+                      <div key={c.case_id} className="rounded-[1.1rem] border border-semantic-line bg-white p-4">
                         <div className="flex flex-wrap items-center gap-2">
                           <StatusPill tone={c.status === 'applied' ? 'success' : c.status === 'rejected' ? 'danger' : 'review'}>
                             {caseStatusLabel(c.status, locale)}
@@ -822,11 +813,11 @@ export function AttendanceOpsPanel({
                           {c.employee_key} · {String(c.work_date || '').slice(0, 10)} · {t.owner}: {c.requested_by_phone || '—'}
                         </p>
                         <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                          <div className="rounded-[0.9rem] border border-[#e8dfd0]/80 bg-[#fffdf8] px-3 py-2 text-[12px]">
+                          <div className="rounded-[0.9rem] border border-semantic-line/80 bg-semantic-surface-raised px-3 py-2 text-[12px]">
                             <div className="font-semibold text-mist">{t.before}</div>
                             <div className="mt-1 text-text">{snapLine(c.before_snapshot, locale)}</div>
                           </div>
-                          <div className="rounded-[0.9rem] border border-[#e8dfd0]/80 bg-[#fffdf8] px-3 py-2 text-[12px]">
+                          <div className="rounded-[0.9rem] border border-semantic-line/80 bg-semantic-surface-raised px-3 py-2 text-[12px]">
                             <div className="font-semibold text-mist">{t.after}</div>
                             <div className="mt-1 text-text">{snapLine(c.after_snapshot, locale)}</div>
                           </div>
@@ -874,7 +865,7 @@ export function AttendanceOpsPanel({
                 ) : (
                   <div className="space-y-3">
                     {openDisputes.map((d) => (
-                      <div key={d.dispute_id} className="rounded-[1.1rem] border border-[#e8dfd0] bg-white p-4">
+                      <div key={d.dispute_id} className="rounded-[1.1rem] border border-semantic-line bg-white p-4">
                         <div className="flex flex-wrap items-center gap-2">
                           <StatusPill tone="danger">{locale === 'ar' ? 'نزاع' : 'Dispute'}</StatusPill>
                           <span className="text-[13px] font-medium text-text">{d.employee_key}</span>
@@ -904,7 +895,7 @@ export function AttendanceOpsPanel({
                 ) : (
                   <div className="space-y-2">
                     {lockedish.slice(0, 20).map((exc) => (
-                      <div key={exc.exception_id} className="rounded-[1rem] border border-[#e8dfd0] bg-white px-3 py-3">
+                      <div key={exc.exception_id} className="rounded-[1rem] border border-semantic-line bg-white px-3 py-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <StatusPill tone="warning">{exceptionKindLabel(exc.kind, locale)}</StatusPill>
                           <span className="text-[13px] font-medium text-text">{exc.employee_name || exc.employee_key}</span>

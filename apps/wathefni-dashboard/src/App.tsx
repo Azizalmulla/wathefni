@@ -198,7 +198,8 @@ function isPeopleSpinePage(page: Page | string): boolean {
     page === 'onboarding' ||
     page === 'preboarding' ||
     page === 'probation' ||
-    page === 'inbox'
+    page === 'inbox' ||
+    page === 'compliance'
   )
 }
 
@@ -854,6 +855,7 @@ function App() {
                 ? {
                     ...(jobsStatusFilter ? { status: jobsStatusFilter } : {}),
                     ...(jobsQuery.trim() ? { q: jobsQuery.trim() } : {}),
+                    ...(selectedJob?.position_code ? { position_code: selectedJob.position_code } : {}),
                   }
                 : {}
     writeDashboardNavUrl(
@@ -891,6 +893,15 @@ function App() {
     if (nextPage === 'jobs') {
       setJobsStatusFilter(nav.filters.status || '')
       if (typeof nav.filters.q === 'string') setJobsQuery(nav.filters.q)
+      const code = String(nav.filters.position_code || '').trim()
+      if (!code) setSelectedJob(null)
+      else {
+        setSelectedJob((current) => {
+          if (current?.position_code === code) return current
+          const match = (jobsData?.positions || []).find((row) => row.position_code === code)
+          return match || current || ({ position_code: code } as PositionSummary)
+        })
+      }
     }
     if (nextPage === 'ranking' && nav.filters.position_code) {
       setRankPosition(nav.filters.position_code)
@@ -1342,6 +1353,7 @@ function App() {
           filters: {
             ...(jobsStatusFilter ? { status: jobsStatusFilter } : {}),
             ...(jobsQuery.trim() ? { q: jobsQuery.trim() } : {}),
+            ...(selectedJob?.position_code ? { position_code: selectedJob.position_code } : {}),
           },
         },
         'replace',
@@ -1411,7 +1423,15 @@ function App() {
     assessmentTab,
     jobsStatusFilter,
     jobsQuery,
+    selectedJob?.position_code,
   ])
+
+  useEffect(() => {
+    if (!selectedJob?.position_code) return
+    const match = (jobsData?.positions || []).find((row) => row.position_code === selectedJob.position_code)
+    if (!match) return
+    if (!selectedJob.position_title && !selectedJob.title) setSelectedJob(match)
+  }, [jobsData?.positions, selectedJob])
 
   useEffect(() => {
     if (page !== 'ranking') return

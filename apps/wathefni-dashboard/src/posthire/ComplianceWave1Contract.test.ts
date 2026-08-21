@@ -13,12 +13,15 @@ const reviewSrc = postHire.slice(reviewStart, reviewEnd > 0 ? reviewEnd : review
 
 describe('Compliance Page Refinement Wave 1 contract', () => {
   it('is findings-first with All documents demoted behind a surface tab', () => {
-    expect(complianceSrc).toContain("useState<'findings' | 'register'>('findings')")
+    expect(complianceSrc).toContain("useUrlBackedTab('compliance', URL_BACKED_WORKSPACE_TABS.compliance, 'findings')")
+    expect(complianceSrc).toContain("useUrlBackedTab('compliance', COMPLIANCE_FILTERS, 'needs_review', 'status')")
     expect(complianceSrc).toContain('data-compliance-findings')
     expect(complianceSrc).toContain('data-compliance-findings-list')
     expect(complianceSrc).toContain('data-compliance-register')
     expect(complianceSrc).toContain('data-compliance-surfaces')
-    expect(complianceSrc).toContain("['register', isAr ? 'كل المستندات' : 'All documents']")
+    expect(complianceSrc).toContain('HrSurfaceTabs')
+    expect(complianceSrc).toContain('ResourceState')
+    expect(complianceSrc).toContain("isAr ? 'كل المستندات' : 'All documents'")
     expect(complianceSrc).not.toMatch(/NextAction/)
     expect(complianceSrc).not.toMatch(/StatCard/)
     expect(complianceSrc).not.toMatch(/Remind all/i)

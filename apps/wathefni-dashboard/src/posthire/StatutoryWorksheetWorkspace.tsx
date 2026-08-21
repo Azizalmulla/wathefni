@@ -16,6 +16,7 @@ import {
 } from '@/lib/api'
 import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { BlockedReason, useEmployees360Locale, WorkflowEmpty } from '@/posthire/employees360/chrome'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import { payrollStatutoryCopy, statutoryStatusTone } from '@/posthire/payrollStatutoryUx'
 import type { DashboardAccess } from '@/types'
 
@@ -195,20 +196,15 @@ export function StatutoryWorksheetWorkspace({
       ) : null}
       <p className="text-[12px] text-subtle md:hidden">{c.mobileHint}</p>
 
-      <div className="flex flex-wrap gap-2">
-        {(['pifss', 'eos', 'rules'] as const).map((t) => (
-          <button
-            key={t}
-            type="button"
-            className={`rounded-full px-3 py-1.5 text-[13px] font-medium ${
-              tab === t ? 'bg-wf-ink text-white' : 'bg-[#f3ebe0] text-subtle'
-            }`}
-            onClick={() => setTab(t)}
-          >
-            {t === 'pifss' ? c.tabPifss : t === 'eos' ? c.tabEos : c.tabRules}
-          </button>
-        ))}
-      </div>
+      <HrSurfaceTabs
+        value={tab}
+        onChange={setTab}
+        items={[
+          { id: 'pifss', label: c.tabPifss },
+          { id: 'eos', label: c.tabEos },
+          { id: 'rules', label: c.tabRules },
+        ]}
+      />
 
       <label className="block text-[13px] text-subtle">
         {c.reasonPlaceholder}

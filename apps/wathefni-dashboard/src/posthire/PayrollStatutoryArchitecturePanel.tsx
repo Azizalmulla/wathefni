@@ -87,13 +87,13 @@ export function PayrollStatutoryArchitecturePanel({
 
   return (
     <div
-      className={cn('space-y-4 rounded-xl border border-[#e8ddd0] bg-white p-4 shadow-sm', isAr && 'text-right')}
+      className={cn('space-y-4 rounded-xl border border-semantic-line bg-semantic-surface-raised p-4 shadow-sm', isAr && 'text-end')}
       dir={isAr ? 'rtl' : 'ltr'}
       data-testid="payroll-statutory-architecture-panel"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold text-[#1c1917]">{c.title}</h3>
+          <h3 className="text-base font-semibold text-semantic-ink">{c.title}</h3>
           <p className="mt-1 max-w-3xl text-sm text-subtle">{c.hint}</p>
           <p className="mt-1 text-xs text-subtle">{c.moneyOff}</p>
         </div>
@@ -141,7 +141,7 @@ export function PayrollStatutoryArchitecturePanel({
           </thead>
           <tbody>
             {rules.slice(0, 12).map((row) => (
-              <tr key={String(row.rule_version_id)} className="border-b border-[#f3ebe0]">
+              <tr key={String(row.rule_version_id)} className="border-b border-semantic-line">
                 <td className="py-2 pe-3 font-mono text-xs">{String(row.rule_family)}</td>
                 <td className="py-2 pe-3">
                   <StatusPill tone={String(row.approval_status) === 'approved' ? 'warning' : 'neutral'}>

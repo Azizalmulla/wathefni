@@ -97,7 +97,7 @@ export function AssignmentHistoryPanel({
               return (
                 <li
                   key={row.history_id || `${row.effective_from}-${idx}`}
-                  className="flex flex-wrap items-start justify-between gap-2 rounded-[1rem] border border-[#e8dfd0]/80 bg-[#fffdf8] px-3 py-2.5"
+                  className="flex flex-wrap items-start justify-between gap-2 rounded-[1rem] border border-semantic-line/80 bg-semantic-surface-raised px-3 py-2.5"
                 >
                   <div>
                     <p className="text-[13px] font-semibold text-text">{String(row.change_type || 'change').replace(/_/g, ' ')}</p>

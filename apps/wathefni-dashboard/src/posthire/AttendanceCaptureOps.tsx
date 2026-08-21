@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/field'
 import { useConfirm } from '@/components/ConfirmDialog'
+import { HrSurfaceTabs } from '@/components/hr/HrSurfaceTabs'
 import {
   approveCaptureMapping,
   getCaptureOpsOverview,
@@ -17,7 +18,6 @@ import { accessIssueFromError, type AccessIssue } from '@/lib/access'
 import { DashboardApiError } from '@/lib/api'
 import type { DashboardAccess } from '@/types'
 import { useEmployees360Locale, type Locale } from '@/posthire/employees360/chrome'
-import { cn } from '@/lib/utils'
 
 function friendlyError(error: unknown, fallback: string): string {
   if (error instanceof DashboardApiError) return error.message || fallback
@@ -391,22 +391,15 @@ export function AttendanceCaptureOpsPanel({
         <Stat label={t.payrollExcluded} value={data.counts?.payroll_excluded ?? 0} />
       </div>
 
-      <div className="flex flex-wrap gap-1 border-b border-border/60 pb-1">
-        {tabs.map((tabItem) => (
-          <button
-            key={tabItem.id}
-            type="button"
-            onClick={() => setTab(tabItem.id)}
-            className={cn(
-              'rounded-md px-3 py-1.5 text-[13px] font-medium transition',
-              tab === tabItem.id ? 'bg-wf-ink/10 text-text' : 'text-subtle hover:text-text',
-            )}
-          >
-            {tabItem.label}
-            <span className="ms-1 text-mist">({tabItem.count})</span>
-          </button>
-        ))}
-      </div>
+      <HrSurfaceTabs
+        value={tab}
+        onChange={setTab}
+        items={tabs.map((tabItem) => ({
+          id: tabItem.id,
+          label: tabItem.label,
+          count: tabItem.count,
+        }))}
+      />
 
       {tab === 'connectors' ? (
         <div className="space-y-2">

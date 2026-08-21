@@ -311,7 +311,7 @@ export function JobsForm({
 
   return (
     <div className="fixed inset-0 z-40 bg-ink/35" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="ml-auto flex h-full w-full max-w-4xl flex-col overflow-y-auto border-l border-line bg-[#fbf8f2] p-4 shadow-soft sm:p-6">
+      <div className="ms-auto flex h-full w-full max-w-4xl flex-col overflow-y-auto border-s border-semantic-line bg-semantic-canvas p-4 shadow-soft sm:p-6">
         <div className="flex items-start justify-between gap-4 rounded-[1.6rem] border border-line/60 bg-panel/90 p-5 ring-1 ring-white/55">
           <div>
             <h2 className="text-2xl font-semibold tracking-[-0.03em] text-text">
@@ -535,7 +535,7 @@ export function JobsForm({
           ) : null}
         </div>
 
-        <div className="sticky bottom-0 -mx-4 mt-auto border-t border-line/60 bg-[#fbf8f2]/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6">
+        <div className="sticky bottom-0 -mx-4 mt-auto border-t border-semantic-line/60 bg-semantic-canvas/95 px-4 py-4 backdrop-blur sm:-mx-6 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-[1.4rem] border border-line/60 bg-panel/90 p-3 ring-1 ring-white/55">
             <div className="flex items-center gap-2 text-sm text-subtle">
               <Pencil size={15} />
