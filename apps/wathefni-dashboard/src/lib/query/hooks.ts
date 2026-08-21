@@ -468,14 +468,15 @@ export function usePrefetchOppositeWorkScope(access: DashboardAccess, scope: 'mi
   useEffect(() => {
     if (!enabled || !accessReady(access)) return
     const other = scope === 'mine' ? 'attention' : 'mine'
+    const notifyScope = other === 'attention' ? 'company' : 'mine'
     const handle = window.setTimeout(() => {
       void client.prefetchQuery({
         queryKey: qk.workQueue(access, other),
         queryFn: ({ signal }) => fetchWorkQueue(access, other, signal),
       })
       void client.prefetchQuery({
-        queryKey: qk.notifications(access, other),
-        queryFn: ({ signal }) => fetchNotifications(access, other, signal),
+        queryKey: qk.notifications(access, notifyScope),
+        queryFn: ({ signal }) => fetchNotifications(access, notifyScope, signal),
       })
     }, 120)
     return () => window.clearTimeout(handle)
